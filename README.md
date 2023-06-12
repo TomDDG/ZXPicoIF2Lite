@@ -11,7 +11,7 @@ The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND p
 
 ### Version Control
 - v0.2 changes to improve ZXC compatibility, added zxcOn true/false ** Latest Version
-- v0.1 initial release taken form PicoIF2ROM but with interrupt drive user button
+- v0.1 initial release taken form PicoIF2ROM but with interrupt driven user button
 
 ## Usage
 Usage is very simple. On every cold boot the Spectrum will default to the normal Spectrum, basically the interface will be disabled. To change ROMs press and hold the user button for >1second and the Spectrum will boot into the ROM Explorer. If you want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. User the cursor/arrow keys to navigate the ROMs and enter to select one. ROMs with icons to the RHS indicate they will launch with ZXC compatibiltiy. More details of the ROM Explorer cna be found below.
