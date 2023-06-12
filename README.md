@@ -83,7 +83,7 @@ In order to swap between all the different ROMs the interface needs a simple ROM
 
 I've provided a fully working ROM Explorer program, in the style of File Explorer, which does exactly this. You can easily replace this with your own if you wish and I've highlighted the relavent sections in the code which need replacing.
 
-![image](./images/romswitchblank_v1_0.png "ROM Explorer")
+![image](./images/romswitchblank_v1_0_v2.png "ROM Explorer")
 
 You can also use the selector to turn the device off, which pages in the Spectrum ROM, especailly useful on 128k machines or if you want to use external devices with shadow ROMs i.e. Interface 1.
 
