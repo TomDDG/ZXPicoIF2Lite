@@ -15,6 +15,8 @@ Usage is very simple. On every cold boot the Spectrum will default to the normal
 ## Building an Interface
 I've provided everything you need to build your own Interface below, includng the Gerbers for getting the PCBs made. I've also provided all the code so you can add your own ROMs and compile the necessary files to load onto the Pico. For details on how to set-up a build enviroment please refer to the [Raspberry Pico SDK documentation](https://www.raspberrypi.com/documentation/pico-sdk/)
 
+Once built, load the UF2 file onto the Pico and boot the Spectrum. Hopefully all works fine.
+
 ### The Schematic
 ![image](./images/picozxcx.png "Schematic")
 
