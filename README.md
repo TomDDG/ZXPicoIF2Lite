@@ -1,6 +1,8 @@
 # ZXPicoZXCx
 IF2 ROM Cartridge replacement using a Raspberry Pico with ability to emulate [Paul Farrow's ZXC Cartridges](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_Cartridges.htm#CustomCartridges). Currently supports ZXC1 & ZXC2 cartridges only. Tested with [Spectrum ROM Tester](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm), [Spectrum 128k Emulator (with & without IF1)](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm) and [Spanish 128k Emulator](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 
+Based on the original design by Derek Fountain https://github.com/derekfountain/zx-spectrum-pico-rom.
+
 ![image](./images/back_nocover.jpg "ZX PicoZXCx")
 
 Includes a simple DB9 joystick connector, wired to Atari pinout and mapped to Sinclair 1 (67890). Note this is a simple hardware implementation inspired by the [Shadow of the Unicorn Interface](https://www.pcbway.com/project/shareproject/Mikro_Gen_Shadow_of_the_Unicorn_interface_Modern_re_creation_for_Sinclair_Spectrum.html) using diodes rather than the Pico (not enough GPIOs) or an inverter chip which most other interfaces use. As a result 5V is not sent to the adapter and autofire functions of some joysticks do not work. This is most likely due to the lack of a constant ground signal, normal fire and directions work fine.
