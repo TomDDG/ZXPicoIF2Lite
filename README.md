@@ -14,7 +14,7 @@ The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND p
 - v0.1 initial release taken form PicoIF2ROM but with interrupt driven user button
 
 ## Usage
-Usage is very simple. On every cold boot the Spectrum will default to the normal Spectrum, basically the interface will be disabled. To change ROMs press and hold the user button for >1second and the Spectrum will boot into the ROM Explorer. If you want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. User the cursor/arrow keys to navigate the ROMs and enter to select one. ROMs with icons to the RHS indicate they will launch with ZXC compatibiltiy. More details of the ROM Explorer cna be found below.
+Usage is very simple. On every cold boot the Spectrum will default to the normal Spectrum, basically the interface will be disabled. To change ROMs press and hold the user button for >1second and the Spectrum will boot into the ROM Explorer. If you want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. User the cursor/arrow keys to navigate the ROMs and enter to select one. ROMs with icons to the RHS indicate they will launch with ZXC compatibiltiy. More details of the ROM Explorer can be found below.
 
 ## Building an Interface
 I've provided everything you need to build your own Interface below, includng the Gerbers for getting the PCBs made. I've also provided all the code so you can add your own ROMs and compile the necessary files to load onto the Pico. For details on how to set-up a build enviroment please refer to the [Raspberry Pico SDK documentation](https://www.raspberrypi.com/documentation/pico-sdk/)
@@ -68,7 +68,7 @@ Once you've added the ROM to `roms_lite.h` you then need to add details about th
 Use the examples in the header file already as a guide.
 
 ## ZXC Compatibiltiy
-As of v0.2 this is compatible with ZXC2 allowing banking, turning off of the ROM and locking the paging. Full details of how ZXC2 works can be found on [Paul Farrow's website](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_ZXC2.htm) but a summary of how I've implemented it is below:
+As of v0.2 the interface has ZXC2 compatibility allowing bank paging, turning off of the ROM and locking the paging. Full details of how ZXC2 works can be found on [Paul Farrow's website](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_ZXC2.htm) but a summary of how I've implemented it is below:
 
 When in ZXC compatibility mode, the Pico will scan each ROM address memory request. If the memory request is in the top 64bytes (`0x3fc0-0x3fff`) the Pico will do one of the following:
 - If address bit 5 is on (1) the Pico will prevent further paging, basically locking the interface. This lock cannot be reversed via software and needs the user (reset) button pressing. Note you can still get into the ROM swap menu by pressing and holding the user button, this simply stops the software paging from working.
