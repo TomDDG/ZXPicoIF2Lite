@@ -35,7 +35,7 @@
 // description to show on the screen for each ROM    
 //   ** this is specific to the ROM Explorer ROM **             
 // max 32 chars                  12345678901234567890123456789012
-    const uint8_t *romName[] = {"Turn ZX PicoZXCx Unit Off"
+    const uint8_t *romName[] = {"Turn ZX PicoZXCx Unit Off" // ** position 0 always needs to be this
                                ,"ROM Tester"
                                ,"Looking Glass ROM"
                                ,"Retroleum DiagROM v1.59"
