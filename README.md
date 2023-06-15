@@ -9,6 +9,8 @@ While researching how to get the 128k ROM editor working on the device, before t
 
 Currently supports ZXC2 cartridges only and tested with [Spectrum ROM Tester](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm), [Spectrum 128k Emulator (with & without IF1)](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm) and [Spanish 128k Emulator](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 
+## The Interface 
+
 ![image](./images/back_nocover.jpg "ZX PicoZXCx")
 
 ## The Joystick
