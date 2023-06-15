@@ -1,7 +1,7 @@
 # ZXPicoZXCx
 IF2 ROM Cartridge replacement using a Raspberry Pico with ability to emulate [Paul Farrow's ZXC Cartridges](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_Cartridges.htm#CustomCartridges). Currently supports ZXC1 & ZXC2 cartridges only. Tested with [Spectrum ROM Tester](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm), [Spectrum 128k Emulator (with & without IF1)](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm) and [Spanish 128k Emulator](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 
-Based on the original design by Derek Fountain https://github.com/derekfountain/zx-spectrum-pico-rom.
+Based on the original Pico ROM design by [Derek Fountain](https://github.com/derekfountain/zx-spectrum-pico-rom).
 
 ![image](./images/back_nocover.jpg "ZX PicoZXCx")
 
