@@ -68,7 +68,7 @@ Once you've added the ROM to `roms_lite.h` you then need to add details about th
 Use the examples in the header file already as a guide.
 
 ## ZXC Compatibiltiy
-As of v0.2 the interface has ZXC2 compatibility allowing bank paging, turning off of the ROM and locking the paging. Full details of how ZXC2 works can be found on [Paul Farrow's website](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_ZXC2.htm) but a summary of how I've implemented it is below:
+As of v0.2 the interface has ZXC2 compatibility allowing bank paging, turning off of the ROM and locking the paging. Full details of Paul's ZXC2 design and how it works can be found on [Paul Farrow's website](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_ZXC2.htm). Below is a quick summary of how I've implemented it using the Pico:
 
 When in ZXC compatibility mode, the Pico will scan each ROM address memory request. If the memory request is in the top 64bytes (`0x3fc0-0x3fff`) the Pico will do one of the following:
 - If address bit 5 is on (1) the Pico will prevent further paging, basically locking the interface. This lock cannot be reversed via software and needs the user (reset) button pressing. Note you can still get into the ROM swap menu by pressing and holding the user button, this simply stops the software paging from working.
