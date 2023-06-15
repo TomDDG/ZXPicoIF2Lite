@@ -1,5 +1,5 @@
 # ZXPicoZXCx
-IF2 ROM Cartridge replacement using a Raspberry Pico with optional compatability with [Paul Farrow's ZXC2 Cartridges](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_Cartridges.htm#CustomCartridges).
+IF2 ROM Cartridge replacement using a Raspberry Pico with optional compatibility with [Paul Farrow's ZXC2 Cartridges](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_Cartridges.htm#CustomCartridges).
 
 The main purpose of this interface is to replicate the [Sinclair Interface 2](https://en.wikipedia.org/wiki/ZX_Interface_2), adapting the original Pico ROM design by [Derek Fountain](https://github.com/derekfountain/zx-spectrum-pico-rom). Derek's idea was to use the Pico's flash memory in place of the ROM cartridges and I adapted this slightly to use the PiO rather than bit-banging, to use through hole components as easier to build, and to also to include a joystick port. 
 
