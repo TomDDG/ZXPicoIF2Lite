@@ -1,7 +1,11 @@
 # ZXPicoZXCx
 IF2 ROM Cartridge replacement using a Raspberry Pico with ability to emulate [Paul Farrow's ZXC Cartridges](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_Cartridges.htm#CustomCartridges). Currently supports ZXC1 & ZXC2 cartridges only. Tested with [Spectrum ROM Tester](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm), [Spectrum 128k Emulator (with & without IF1)](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm) and [Spanish 128k Emulator](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 
-Based on the original Pico ROM design by [Derek Fountain](https://github.com/derekfountain/zx-spectrum-pico-rom).
+The main purpose of this interface is to replicate the Sinclair Interface 2, adapting the original Pico ROM design by [Derek Fountain](https://github.com/derekfountain/zx-spectrum-pico-rom). Derek's idea was to use the Pico's flash memory in place of the ROM cartridges and I adapted this slightly to use the PiO rather than bit-banging, to use through hole components as easier to build, and to also to include a joystick port. 
+
+One of the main issues I had with the original design was it always had to have a ROM paged in. This made it difficult to use shadow ROMs like with an Interface 1 and basically meant adding functionality to the Pico to page in the IF1 ROM when needed. It also wasn't great on a 128k machine as it stopped the editor being useable. I therefore altered the design to be able to control the ROMCS line using the Pico which meant the unit could be disabled.
+
+While researching how to get the 128k ROM editor working on the device before the ROMCS change, I remembered [Paul Farrow's FruitCake website](http://www.fruitcake.plus.com/Sinclair/Interface2/Interface2_ResourceCentre.htm) and the numerous ROMs he had created. Some of those ROMs require software based bank switching and also for the unit to be disabled. Now that I could control the ROMCS line it was relatively easy to adapt the Pico code so that it could be compatible with Paul's ZX2 device. As ZX2 compatibility isn't always disirable (as Paul states on his website) I added a toggle so that you can say whether you want ZX2 compatibility or just run the unit as originally intended.
 
 ![image](./images/back_nocover.jpg "ZX PicoZXCx")
 
@@ -14,10 +18,10 @@ The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND p
 - v0.1 initial release taken form PicoIF2ROM but with interrupt driven user button
 
 ## Usage
-Usage is very simple. On every cold boot the Interface will be off meaning to Spectrum will boot as if nothing attached. To activate the interface press and hold the user button for >1second, the Spectrum will now boot into the ROM Explorer. If you just want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. User the cursor/arrow keys to navigate the ROMs and enter to select one. ROMs with icons to the right hand side indicate they will launch with ZXC compatibiltiy. More details of the ROM Explorer can be found below.
+Usage is very simple. On every cold boot the Interface will be off meaning to Spectrum will boot as if nothing attached. To activate the interface press and hold the user button for >1second, the Spectrum will now boot into the ROM Explorer. If you just want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. User the cursor/arrow keys to navigate the ROMs and enter to select one. ROMs with icons to the right hand side indicate they will launch with ZXC compatibility. More details of the ROM Explorer can be found below.
 
 ## Building an Interface
-I've provided everything you need to build your own Interface below, includng the Gerbers for getting the PCBs made. I've also provided all the code so you can add your own ROMs and compile the necessary files to load onto the Pico. For details on how to set-up a build enviroment please refer to the [Raspberry Pico SDK documentation](https://www.raspberrypi.com/documentation/pico-sdk/)
+I've provided everything you need to build your own Interface below, including the Gerbers for getting the PCBs made. I've also provided all the code so you can add your own ROMs and compile the necessary files to load onto the Pico. For details on how to set-up a build environment please refer to the [Raspberry Pico SDK documentation](https://www.raspberrypi.com/documentation/pico-sdk/)
 
 Once built, load the UF2 file onto the Pico and boot the Spectrum. Hopefully all works fine.
 
@@ -53,27 +57,27 @@ For demonstration purposes I have included the following ROMs, if you are the ow
 - [128k RAM Tester by Paul Farrow](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_RAM_Tester.htm)
 - [Looking Glass ROM by Geoff Wearmouth as used on the Spectrum Next](https://gitlab.com/thesmog358/tbblue/-/tree/master/machines/next)
 - [Spectrum 128k Emulator by Paul Farrow](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm)
-- [Spanish 128k Emualtor by Paul Farrow](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
+- [Spanish 128k Emulator by Paul Farrow](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 - [Spectrum ROM Tester by Paul Farrow](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm)
 
 ### Adding your own ROMs
-To add your own ROMs you need to first create a binary dump of the ROM (or just download it) and convert that into a `uint8_t` array to put in the `roms_lite.h` header file. I've written a little utility to do this called `compressROM`. This utiltiy uses a very simple compression alogrithm to reduce the size of the ROMs which helps if you want to add a loads of them (max 126). After compressing the utility creates the approprite header file structure to paste into `roms_lite.h`.
+To add your own ROMs you need to first create a binary dump of the ROM (or just download it) and convert that into a `uint8_t` array to put in the `roms_lite.h` header file. I've written a little utility to do this called `compressROM`. This utility uses a very simple compression algorithm to reduce the size of the ROMs which helps if you want to add a loads of them (max 126). After compressing the utility creates the appropriate header file structure to paste into `roms_lite.h`.
 
 Once you've added the ROM to `roms_lite.h` you then need to add details about the ROM to the `picozxcx_lite.h` header file. This is in four parts.
-1. name of the arrary
+1. name of the array
 2. whether you need to enable ZXC compatibility
-3. the desciption to show in the ROM selector (max 32chars)
+3. the description to show in the ROM selector (max 32chars)
 4. Set the `MAXROMS` number to match the number of ROMs
 
 Use the examples in the header file already as a guide.
 
-## ZXC Compatibiltiy
+## ZXC Compatibility
 As of v0.2 the interface has ZXC2 compatibility allowing bank paging, turning off of the ROM and locking the paging. Full details of Paul's ZXC2 design and how it works can be found on [Paul Farrow's website](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_ZXC2.htm). Below is a quick summary of how I've implemented it using the Pico:
 
 When in ZXC compatibility mode, the Pico will scan each ROM address memory request. If the memory request is in the top 64bytes (`0x3fc0-0x3fff`) the Pico will do one of the following:
 - If address bit 5 is on (1) the Pico will prevent further paging, basically locking the interface. This lock cannot be reversed via software and needs the user (reset) button pressing. Note you can still get into the ROM swap menu by pressing and holding the user button, this simply stops the software paging from working.
-- If addressbit 4 is on (1) the Pico will page out the interface ROM paging in the Spectrum ROM
-- If addressbit 4 is off (0) the Pico will page in the interface ROM, paging out the Spectrum ROM
+- If address bit 4 is on (1) the Pico will page out the interface ROM paging in the Spectrum ROM
+- If address bit 4 is off (0) the Pico will page in the interface ROM, paging out the Spectrum ROM
 - Address bits 0-3 are used to determine which ROM to page in, 0 is ROM 0, 5 is ROM 5 etc... I've set-up the Pico to mimic a 128k EPROM which allows for 8 banks/pages. 
   - To use this you need to create a single ROM binary with all the ROMs you want to swap in/out using the ZXC commands. 
   - The Spectrum 128k emulator ROM on Paul's website is a 32kB or 48kB ROM as an example. You don't need to split this into 2 or 3 16kB ROMs, just load the whole thing.
