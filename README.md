@@ -7,7 +7,7 @@ One of the main issues I had with the original design was it always had to have 
 
 ## The Interface 
 
-![image](./images/back_nocover.jpg "ZX PicoIF2Lite")
+![image](./images/back_nocoveron.jpg "ZX PicoIF2Lite")
 
 The Interface is very simple with the Pico doing most of the heavy lifting. I've used 74LVC245 bus transceivers (as per Derek's original) to level shift both the address line (A0-A13) and data line (D0-D7) between the Pico and the edge connector. These chips also have the advantage of a high impedance mode when they are not required, something used on data line when the ROM isn't being accessed. The other chip in the circuit is a 4075 tri-input OR chip which is used to combine the A14, A15 & MREQ signals, which is basically indicating a ROM access. As the 4075 has three logic units I've also used this for the joystick.
 
