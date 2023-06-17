@@ -34,7 +34,7 @@ Once built, load the UF2 file onto the Pico and boot the Spectrum. Hopefully all
 ![image](./images/picozxcx.png "Schematic")
 
 ### The PCB
-![image](./images/picozxcx_brd.png "Board")
+![image](./images/picoif2lite_brd.png "Board")
 
 All the files needed to make your own PCB are in the [Gerbers folder](./gerbers/), zipped.
 
