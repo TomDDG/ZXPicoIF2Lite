@@ -1,0 +1,7 @@
+.program picoif2
+.wrap_target
+    wait 0 gpio 26  // wait for MREQ, A14 & A15 to all go low
+    in pins 14 // shift in the bottom 14 bits from gpio pins to ISR, auto push enabled ISR to RX FIFO
+    out pins 8 // DMA populates OSR with the correct byte, shift single byte (8 bits) from OSR to gpio pins
+    wait 1 gpio 26 // wait for MREQ, A14 & A15 to all go high
+.wrap
