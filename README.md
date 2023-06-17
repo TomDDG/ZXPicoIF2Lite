@@ -1,15 +1,9 @@
-# ZXPicoZXCx
-Sinclair Interface 2 replacement including ROM Cartridge emulation using a Raspberry Pico with optional compatibility with [Paul Farrow's ZXC2 Cartridges](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_Cartridges.htm#CustomCartridges).
+# ZX PicoIF2Lite
+Sinclair Interface 2 replacement including ROM Cartridge emulation using a Raspberry Pico.
 
 The main purpose of this interface is to replicate the [Sinclair Interface 2](https://en.wikipedia.org/wiki/ZX_Interface_2), adapting the original Pico ROM design by [Derek Fountain](https://github.com/derekfountain/zx-spectrum-pico-rom). Derek's idea was to use the Pico's flash memory in place of the ROM cartridges and I adapted this slightly to use the PiO rather than bit-banging, to use through hole components as easier to build, and to also to include a joystick port. 
 
 One of the main issues I had with the original design was it always had to have a ROM paged in, with the ROMCS line permanently attached to 5V. This made it difficult to use shadow ROMs like with an Interface 1, and basically meant adding functionality to the Pico to page in the IF1 ROM when needed. It also wasn't great on a 128k machine as it stopped the editor being useable. I therefore altered the design to be able to control the ROMCS line using the Pico which meant the unit could be disabled. This did mean losing the M1 line read but this is how the original IF2 was designed.
-
-While researching how to get the 128k ROM editor working on the device, before the ROMCS change, I remembered [Paul Farrow's FruitCake website](http://www.fruitcake.plus.com/Sinclair/Interface2/Interface2_ResourceCentre.htm) and the numerous cartridges and ROMs he had created. Some of those ROMs require software based bank switching and also for the unit to be disabled. Now that I could control the ROMCS line it was relatively easy to adapt the Pico code so that it could be compatible with Paul's ZX2 device. As ZX2 compatibility isn't always desirable, due to it constantly scaning the top 64kB of ROM untill you tell it not to, I added a toggle so that you can chose whether you want ZX2 compatibility or just run the unit as originally intended.
-
-In homage to Paul's work, and to highlight the compatibility, I renamed the unit to ZX PicoZXCx.
-
-Currently supports normal and ZXC2 cartridges only. ZX2 compatibility was tested with [Spectrum ROM Tester](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm), [Spectrum 128k Emulator (with & without IF1)](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm) and [Spanish 128k Emulator](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 
 ## The Interface 
 
@@ -82,7 +76,9 @@ Once you've added the ROM to `roms_lite.h` you then need to add details about th
 
 Use the examples in the header file already as a guide.
 
-## ZXC Compatibility
+## ZXC2 Compatibility
+While researching how to get the 128k ROM editor working on the device, before the ROMCS change, I remembered [Paul Farrow's FruitCake website](http://www.fruitcake.plus.com/Sinclair/Interface2/Interface2_ResourceCentre.htm) and the numerous cartridges and ROMs he had created. Some of those ROMs require software based bank switching and also for the unit to be disabled. Now that I could control the ROMCS line it was relatively easy to adapt the Pico code so that it could be compatible with Paul's ZX2 device. As ZX2 compatibility isn't always desirable, due to it constantly scaning the top 64kB of ROM untill you tell it not to, I added a toggle so that you can chose whether you want ZX2 compatibility or just run the unit as originally intended.
+
 As of v0.2 the interface has ZXC2 compatibility allowing bank paging, turning off of the ROM and locking the paging. Full details of Paul's ZXC2 design and how it works can be found on [Paul Farrow's website](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_ZXC2.htm). Below is a quick summary of how I've implemented it using the Pico:
 
 When in ZXC compatibility mode, the Pico will scan each ROM address memory request. If the memory request is in the top 64bytes (`0x3fc0-0x3fff`) the Pico will do one of the following:
@@ -92,6 +88,8 @@ When in ZXC compatibility mode, the Pico will scan each ROM address memory reque
 - Address bits 0-3 are used to determine which ROM to page in, 0 is ROM 0, 5 is ROM 5 etc... I've set-up the Pico to mimic a 128k EPROM which allows for 8 banks/pages. 
   - To use this you need to create a single ROM binary with all the ROMs you want to swap in/out using the ZXC commands. 
   - The Spectrum 128k emulator ROM on Paul's website is a 32kB or 48kB ROM as an example. You don't need to split this into 2 or 3 16kB ROMs, just load the whole thing.
+ 
+Currently supports normal and ZXC2 cartridges only. ZX2 compatibility was tested with [Spectrum ROM Tester](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm), [Spectrum 128k Emulator (with & without IF1)](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm) and [Spanish 128k Emulator](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 
 ## The ROM Selector
 In order to swap between all the different ROMs the interface needs a simple ROM Selector utility which runs on the Spectrum. Once this has launched the Pico will constantly monitor the top of ROM memory, so to pick a ROM all the Spectrum code needs to do is loop over a memory read at the correct location between `0x3f80` and `0x3fff`. For example `0x3f80` is ROM 0, `0x3f96` is ROM 22. If a ROM is selected which doesn't exist the code will just pick the last ROM.
