@@ -56,7 +56,7 @@ All the files needed to make your own PCB are in the [Gerbers folder](./gerbers/
 - 1x [DE9 9pin Male PCB Connector](https://www.ebay.co.uk/sch/i.html?_from=R40&_trksid=p2334524.m570.l1313&_nkw=db9+9pin+pcb+male+connector&_sacat=0&LH_TitleDesc=0&_osacat=0&_odkw=db9+9pin+pcb+male+connector)
 
 ## The ROMs
-For demonstration purposes I have included the following ROMs, if you are the owner of this ROM and do not want it including please just contact me and I'll remove it:
+For demonstration purposes I have included the following ROMs, if you are the owner of any of these ROMs and do not want it including please just contact me and I'll remove it:
 - Original ZX Spectrum ROM (copyright Amstrad)
 - [Retroleum DiagROM v1.59 by Retroleum](http://blog.retroleum.co.uk/electronics-articles/a-diagnostic-rom-image-for-the-zx-spectrum/)
 - [ZX Spectrum Diagnostics v0.37 by Brendan Alford](https://github.com/brendanalford/zx-diagnostics/releases/tag/v0.37)
