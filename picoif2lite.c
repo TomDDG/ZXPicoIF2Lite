@@ -1,9 +1,10 @@
 // Versions
 // v0.1 initial release taken form PicoIF2ROM but with interrupt drive user button
 // v0.2 changes to improve ZXC compatibility, added zxcOn true/false
+// v0.3 Z80/SNA snapshot support, zxcOn->compatMode
 //
 #define PROG_NAME   "ZX PicoIF2Lite"
-#define VERSION_NUM "v0.2"
+#define VERSION_NUM "v0.3"
 // ---------------------------------------------------------------------------
 // includes
 // ---------------------------------------------------------------------------
@@ -13,8 +14,8 @@
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "picoif2lite.pio.h"
-// #include "roms.h"   // the ROMs
-// #include "picoif2lite.h"   // header
+//#include "roms.h"   // the ROMs
+//#include "picoif2lite.h"   // header
 #include "roms_lite.h"   // the ROMs (lite version)
 #include "picoif2lite_lite.h"   // header (lite version)
 // ---------------------------------------------------------------------------
@@ -23,6 +24,10 @@
 #define PIN_A0      0   // GPIO 0-13 for A0-A13
 #define PIN_D0      14  // GPIO 15-21 for D0-D7
 #define PIN_LED     25  // Default LED pin for Pico (not W)
+//                  3         2         1   
+//                 10987654321098765432109876543210
+#define MASK_LED 0b00000010000000000000000000000000
+
 //
 #define PIN_RESET   28  // GPIO to control RESET of Spectrum 
 #define PIN_USER    22  // User input GPIO (v1.1 PCB this is 22)
@@ -69,7 +74,11 @@ void main() {
                 bank1[bpos++]=romName[romnum][i];
             }
         } 
-        if(zxcOn[romnum]==true) {
+        if(compatMode[romnum]==1) {
+            bank1[bpos++]=9;
+            bank1[bpos++]=28;
+            bank1[bpos++]=29;
+        } else if(compatMode[romnum]==3||compatMode[romnum]==8) { // 48k or 128k snapshot
             bank1[bpos++]=9;
             bank1[bpos++]=26;
             bank1[bpos++]=27;
@@ -135,33 +144,46 @@ void main() {
     while(true) {
         address=pio_sm_get_blocking(pio,addr_data_sm);
         pio_sm_put_blocking(pio,addr_data_sm,bank1[address+adder]); // if ROMCS off then direction of Data chip is input so they do not interfere
-        // zxc routine
-        if(zxcOn[rompos]==true&&pagingOn==true) {
-            // top 64 ROM locations (0x3fc0-0x3fff)
-            // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
-            //  0  0  1  1  1  1  1  1  1  1  l  p  b  b  b  b
-            // (l)ock - set to 1 to prevent further paging (0x3fe0)
-            // (p)age out - set to 1 to page out the ROM cartridge, 0 to page back in (0x3fd0)
-            // (b)ank - select between the 16 banks
-            if(address>=0x3fc0) {
-                // page in/out
-                if((address&poMask)==poMask) {
-                    gpio_put(PIN_ROMCS,false);    // ROM off
+        // z80 routine
+        if((compatMode[rompos]==3||compatMode[rompos]==8)) {      
+            if(address==0x3fff) {
+                if(pagingOn==true) {
+                    adder+=16384;
+                    if(adder==compatMode[rompos]*16384) {
+                        adder=0;
+                        pagingOn=false;
+                    }
                 } else {
-                    gpio_put(PIN_ROMCS,true);    // ROM on
-                }
-                // bank 0-7 (not enough memory for all 16 banks, only 8 allowed)
-                adder=(address&bkMask)*16384;
-                if(adder>131072) adder=0;
-                // lock paging
-                if((address&lkMask)==lkMask) {
-                    pagingOn=false;
                     gpio_put(PIN_LED,false);
+                    gpio_put(PIN_ROMCS,false);    // ROM off
                 }
             }
+        } else if(compatMode[rompos]==1&&pagingOn==true) {
+                // top 64 ROM locations (0x3fc0-0x3fff)
+                // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+                //  0  0  1  1  1  1  1  1  1  1  l  p  b  b  b  b
+                // (l)ock - set to 1 to prevent further paging (0x3fe0)
+                // (p)age out - set to 1 to page out the ROM cartridge, 0 to page back in (0x3fd0)
+                // (b)ank - select between the 16 banks
+                if(address>=0x3fc0) {
+                    // page in/out
+                    if((address&poMask)==poMask) {
+                        gpio_put(PIN_ROMCS,false);    // ROM off
+                    } else {
+                        gpio_put(PIN_ROMCS,true);    // ROM on
+                    }
+                    // bank 0-7 (not enough memory for all 16 banks, only 8 allowed)
+                    adder=(address&bkMask)*16384;
+                    if(adder>131072) adder=0;
+                    // lock paging
+                    if((address&lkMask)==lkMask) {
+                        pagingOn=false;
+                        gpio_put(PIN_LED,false);
+                    }
+            }
         }
-    }        
-}
+    }
+}        
 //
 // ---------------------------------------------------------------------------
 // resetButton - interrupt driven routine when user button pressed
@@ -204,10 +226,10 @@ void resetButton(uint gpio,uint32_t events) {
         busy_wait_us_32(200000); // wait 200ms to show rom selector screen                                            
     }
     // final set-up before restart
-    if(zxcOn[rompos]==true) {
+    if(compatMode[rompos]==1||compatMode[rompos]==3||compatMode[rompos]==8) {
         pagingOn=true; // if the ROM had this off make sure it is back on
         gpio_put(PIN_LED,true); 
-    }    
+    }
     if(rompos==0) {
         gpio_put(PIN_ROMCS,false);     // turn off ROMCS      
     } else {

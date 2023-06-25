@@ -20,18 +20,18 @@
 //     (l)ock - set to 1 to prevent further paging (0x3fe0)
 //     (p)age out - set to 1 to page out the ROM cartridge, 0 to page back in (0x3fd0)
 //     (b)ank - select between the 16 banks (0x3fc0)                           
-    const bool zxcOn[] = {false
-                          ,true
-                          ,false
-                          ,false
-                          ,true
-                          ,false
-                          ,false
-                          ,true
-                          ,true
-                          ,true
-                          ,false
-                          };                                
+    const uint8_t compatMode[] = {0
+                                 ,1
+                                 ,0
+                                 ,0
+                                 ,1
+                                 ,0
+                                 ,0
+                                 ,1
+                                 ,1
+                                 ,1
+                                 ,0
+                                 };                                
 // description to show on the screen for each ROM    
 //   ** this is specific to the ROM Explorer ROM **             
 // max 32 chars                  12345678901234567890123456789012
