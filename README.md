@@ -95,10 +95,10 @@ The conversion of the snapshot to ROM is relatively simple and takes advantage o
   - The copy routine simply copies ROM 2 to location 0xc000 to 0xffff
   - When the routine accesses memory location 0x3fff the Pico does one of the following:
     - If it is a 48k snapshot it switches back in ROM 0 and jumps into this to finish the snapshot load
-    - If it is a 128k snapshot it continues copying the rest of the memory - Bank 1, 3, 4, 6 & 7 in turn
+    - If it is a 128k snapshot it continues copying the rest of the memory - Bank 1, 3, 4, 6 & 7 in turn. After bank 7 it switches back to ROM 0 as per 48k.
 - Back in ROM 0 the routine decompresses Memory Bank 5 to 0x4000 to 0x7fff
   - It then sets the registers and jumps back into memory for the final part of the loader
-  - The final part of the loader (7bytes long) is placed either in the screen or under the stack if possible to avoid screen corruption.
+  - The final part of the loader (7bytes long) is placed either in the screen or just under the stack, if possible, to avoid screen corruption.
 - The final part tells the interface to turn off, enables interrupts (if needed) and jumps to the correct program counter. The snapshot is now fully loaded.
 
 Even with 128k Snapshots the loading is near instant.
