@@ -82,7 +82,7 @@ Once you've added the ROM to `roms_lite.h` you then need to add details about th
 Use the examples in the header file already as a guide.
 
 ## Z80 & SNA Snapshot Compatibility
-As of v0.3 the interface supports z80 & SNA snapshots that have been converted into a ROM cartridge. This works with 48k and 128k snapshots. I've included a small utility, [Z80toROM](https://github.com/TomDDG/ZXPicoIF2Lite/blob/main/z80torom.c), which converts snapshots into the correct format to include in the `roms_lite.h` and `picoif2lite_lite.h` files. 
+As of v0.3 the interface supports Z80 & SNA snapshots that have been converted into a ROM cartridge. This works with 48k and 128k snapshots. I've included a small utility, [Z80toROM](https://github.com/TomDDG/ZXPicoIF2Lite/blob/main/z80torom.c), which converts snapshots into the correct format to include in the `roms_lite.h` and `picoif2lite_lite.h` files. 
 
 The conversion of the snapshot to ROM is relatively simple and takes advantage of ROM paging and ability to switch off the interface. It works as follows:
 - ROM 0 has the loader and compressed Memory Bank 5 (memory lcoation 0x4000, the one with the screen)
