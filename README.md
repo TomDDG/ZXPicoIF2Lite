@@ -82,7 +82,22 @@ Once you've added the ROM to `roms_lite.h` you then need to add details about th
 Use the examples in the header file already as a guide.
 
 ## Z80 & SNA Snapshot Compatibility
-As of v0.3 the interface supports z80 & SNA snapshots that have been converted into a ROM cartridge. I've included a small utility, [Z80toROM](https://github.com/TomDDG/ZXPicoIF2Lite/blob/main/z80torom.c), which converts snapshots into the correct format to include in the `roms_lite.h` and `picoif2lite_lite.h` files. 
+As of v0.3 the interface supports z80 & SNA snapshots that have been converted into a ROM cartridge. This works with 48k and 128k snapshots. I've included a small utility, [Z80toROM](https://github.com/TomDDG/ZXPicoIF2Lite/blob/main/z80torom.c), which converts snapshots into the correct format to include in the `roms_lite.h` and `picoif2lite_lite.h` files. 
+
+The conversion of the snapshot to ROM is relatively simple and takes advantage of ROM paging and ability to switch off the interface. It works as follows:
+- ROM 0 has the loader and compressed Memory Bank 5 (memory lcoation 0x4000, the one with the screen)
+  - Upon launch the ROM copies a simple copy program to RAM (@0x6000) and jumps to this location after the copy
+  - The code accesses memory location 0x3fff which tells the Pico to switch to the next ROM
+- ROM 1 contains Memory Bank 2 (memory location 0x8000)
+  - The copy routine simply copies ROM 1 to location 0x8000 to 0xbfff
+  - When the routine accesses memory location 0x3fff the Pico again knows to switch the ROM to the next one (after the memory contents have been written)
+- ROM 2 contains Memory Bank 0
+  - The copy routine simply copies ROM 2 to location 0xc000 to 0xffff
+  - When the routine accesses memory location 0x3fff the Pico does one of the following:
+    - If it is a 48k snapshot it switches back in ROM 0 and jumps into this to finish the snapshot load
+    - If it is a 128k snapshot it continues copying the rest of the memory - Bank 1, 3, 4, 6 & 7 in turn
+- Back in ROM 0 the routine decompresses Memory Bank 5 to 0x4000 to 0x7fff
+  - It then sets the registers and jumps to the correct place in memory
 
 ## ZXC2 Cartridge Compatibility
 While researching how to get the 128k ROM editor working on the device, before the ROMCS change, I remembered [Paul Farrow's FruitCake website](http://www.fruitcake.plus.com/Sinclair/Interface2/Interface2_ResourceCentre.htm) and the numerous cartridges and ROMs he had created. Some of those ROMs require software based bank switching and also for the unit to be disabled. Now that I could control the ROMCS line it was relatively easy to adapt the Pico code so that it could be compatible with Paul's ZX2 cartridge. As ZX2 compatibility isn't always desirable, due to it constantly scanning the top 64kB of ROM until you tell it not to, I added a toggle so that you can chose whether you want ZX2 compatibility or just run the unit as originally intended.
