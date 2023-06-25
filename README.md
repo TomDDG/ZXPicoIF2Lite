@@ -101,7 +101,7 @@ The conversion of the snapshot to ROM is relatively simple and takes advantage o
   - The final part of the loader (7bytes long) is placed either in the screen or just under the stack, if possible, to avoid screen corruption.
 - The final part tells the interface to turn off, enables interrupts (if needed) and jumps to the correct program counter. The snapshot is now fully loaded.
 
-Even with 128k Snapshots the loading is near instant.
+Even with 128k Snapshots the loading is near instant. While the Pico is copying the ROM to memory the LED will be on.
 
 ## ZXC2 Cartridge Compatibility
 While researching how to get the 128k ROM editor working on the device, before the ROMCS change, I remembered [Paul Farrow's FruitCake website](http://www.fruitcake.plus.com/Sinclair/Interface2/Interface2_ResourceCentre.htm) and the numerous cartridges and ROMs he had created. Some of those ROMs require software based bank switching and also for the unit to be disabled. Now that I could control the ROMCS line it was relatively easy to adapt the Pico code so that it could be compatible with Paul's ZX2 cartridge. As ZX2 compatibility isn't always desirable, due to it constantly scanning the top 64kB of ROM until you tell it not to, I added a toggle so that you can chose whether you want ZX2 compatibility or just run the unit as originally intended.
