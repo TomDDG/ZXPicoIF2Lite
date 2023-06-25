@@ -21,7 +21,8 @@ Includes a simple 9pin joystick connector (DE-9 often referred to as DB-9), wire
 The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND pin of the joystick low when RD, A0, A12 & IORQ are low, high when any of them isn't low. This is basically simulating when the Spectrum is reading 67890 on the keyboard. If the output from the OR chip is low then if you move the joystick or press fire it grounds one of the data lines, either D0, D1, D2, D3 or D4. This creates the correct bit pattern for a IN 0xfe read on the Spectrum. Diodes protect the data line so it literally only zeros the bits when they are needed. I beleive it is the fact that the ground pin of the joystick isn't constant that autofire circuits don't work.
 
 ## Version Control
-- v0.2 added ZXC2 cartridge compatibility **Latest Version
+- v0.3 added converted Z80 and SNA ROM compatibility **Latest Version 
+- v0.2 added ZXC2 cartridge compatibility
 - v0.1 initial release taken form PicoIF2ROM but with interrupt driven user button
 
 ## Usage
@@ -79,6 +80,9 @@ Once you've added the ROM to `roms_lite.h` you then need to add details about th
 4. Set the `MAXROMS` number to match the number of ROMs
 
 Use the examples in the header file already as a guide.
+
+## Z80 & SNA Snapshot Compatibility
+As of v0.3 the interface supports z80 & SNA snapshots that have been converted into a ROM cartridge. I've included a small utility, [Z80toROM](https://github.com/TomDDG/ZXPicoIF2Lite/blob/main/z80torom.c), which converts snapshots into the correct format to include in the `roms_lite.h` and `picoif2lite_lite.h` files. 
 
 ## ZXC2 Cartridge Compatibility
 While researching how to get the 128k ROM editor working on the device, before the ROMCS change, I remembered [Paul Farrow's FruitCake website](http://www.fruitcake.plus.com/Sinclair/Interface2/Interface2_ResourceCentre.htm) and the numerous cartridges and ROMs he had created. Some of those ROMs require software based bank switching and also for the unit to be disabled. Now that I could control the ROMCS line it was relatively easy to adapt the Pico code so that it could be compatible with Paul's ZX2 cartridge. As ZX2 compatibility isn't always desirable, due to it constantly scanning the top 64kB of ROM until you tell it not to, I added a toggle so that you can chose whether you want ZX2 compatibility or just run the unit as originally intended.
