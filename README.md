@@ -5,7 +5,7 @@ The main purpose of this interface is to replicate the [Sinclair Interface 2](ht
 
 One of the main issues I had with the original design was it always had to have a ROM paged in, with the ROMCS line permanently attached to 5V. This made it difficult to use shadow ROMs like with an Interface 1, and basically meant adding functionality to the Pico to page in the IF1 ROM when needed. It also wasn't great on a 128k machine as it stopped the editor being useable. I therefore altered the design to be able to control the ROMCS line using the Pico which meant the interface could be disabled. This did mean losing the M1 line read but this is how the original IF2 was designed.
 
-The big advantage of disabling the Interface is reverting the Spectrum back to original state which improves compatibility with games etc... As of v0.3 I added Z80 and SNA snapshot support which takes advantage of this, disabling the interface once it has copied the snapshot into RAM.
+The big advantage of disabling the Interface is reverting the Spectrum back to original state which improves compatibility with games etc... As of v0.3 I added [Z80 and SNA snapshot](#z80--sna-snapshot-compatibility) support which takes advantage of this.
 
 ## The Interface 
 
