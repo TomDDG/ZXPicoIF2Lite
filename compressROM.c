@@ -1,3 +1,19 @@
+// compressROM - simple ZX Spectrum ROM compression
+// Copyright (c) 2023, Tom Dalby
+// 
+// compressROM is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// compressROM is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with compressROM. If not, see <http://www.gnu.org/licenses/>. 
+//
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -16,10 +32,11 @@ int main(int argc, char* argv[]) {
 		fprintf(stdout,"    -p pad space to 16kB, for 8kB ROMs only\n");
 		fprintf(stdout,"    -b produce binary file\n");
 		fprintf(stdout,"    -c check compression\n");
+		fprintf(stdout,"    -d do not compress just create header, also ignores size check\n");
         exit(0);
     }
 	// check for options
-	bool padSpace=false,binaryOn=false,testCompression=false;
+	bool padSpace=false,binaryOn=false,testCompression=false,noCompression=false;
 	uint argNum=1;
 	while(argv[argNum][0]=='-') {
 		if(argv[argNum][1]=='p') {
@@ -28,6 +45,8 @@ int main(int argc, char* argv[]) {
 			binaryOn=true;
 		} else if(argv[argNum][1]=='c') {
 			testCompression=true;
+		} else if(argv[argNum][1]=='d') {
+			noCompression=true;
 		} else {
 			error(0);
 		}
@@ -44,7 +63,9 @@ int main(int argc, char* argv[]) {
     uint8_t *readin;
 	uint i,j;
 	if(testCompression==false) {
-    	if(filesize%8192!=0) error(2); // doesn't seem to be a ROM so error	
+		if(noCompression==false) {
+    		if(filesize%8192!=0) error(2); // doesn't seem to be a ROM so error	
+		}
 		if(filesize>16384) {
 			if((readin=malloc(filesize))==NULL) error(3); // cannot allocate memory
 			for(i=0;i<filesize;i++) readin[i]=0x00; // clear readin buffer
@@ -63,7 +84,12 @@ int main(int argc, char* argv[]) {
 		if((comp=malloc(filesize+(filesize/32)))==NULL) error(3); // cannot allocate memory for compression
 		uint16_t compsize;
 		if(padSpace==true) filesize=16384;
-		compsize=simplelz(readin,comp,filesize);
+		if(noCompression==false) {
+			compsize=simplelz(readin,comp,filesize);
+		} else {
+			compsize=filesize;
+			for(i=0;i<filesize;i++) comp[i]=readin[i];
+		}
 		free(readin);    
 		//
 		char outName[256],headerName[256];
