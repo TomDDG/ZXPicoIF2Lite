@@ -41,7 +41,7 @@ Once built, load the UF2 file onto the Pico and boot the Spectrum. Hopefully all
 ### The PCB
 ![image](./images/picoif2lite_brd.png "Board")
 
-All the files needed to make your own PCB are in the [Gerbers folder](./gerbers/), zipped.
+All the files needed to make your own PCB are in the [Gerbers folder](./gerbers/), zipped. I've also popped them on [PCBWay](https://www.pcbway.com/project/shareproject/ZX_PicoZXCx_Sinclair_ZX_Spectrum_Interface_2_Replacement_18716605.html) if you find that easier.
 
 ### Bill of Materials (BoM)
 - 1x [Raspberry Pico](https://shop.pimoroni.com/products/raspberry-pi-pico?variant=40059364311123). Recommend H variant as header pre-soldered.
@@ -71,13 +71,14 @@ For demonstration purposes I have included the following ROMs, if you are the ow
 - [Spectrum ROM Tester by Paul Farrow](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm)
 
 ### Adding your own ROMs
-To add your own ROMs you need to first create a binary dump of the ROM (or just download it) and convert that into a `uint8_t` array to put in the `roms_lite.h` header file. I've written a little utility to do this called `compressROM`. This utility uses a very simple compression algorithm to reduce the size of the ROMs which helps if you want to add a loads of them (max 126). After compressing the utility creates the appropriate header file structure to paste into `roms_lite.h`.
+To add your own ROMs you need to first create a binary dump of the ROM (or just download it) and convert that into a `uint8_t` array to put in the `roms_lite.h` header file. I've written a little utility to do this called `compressROM`. This utility uses a very simple compression algorithm to reduce the size of the ROMs which helps if you want to add a loads of them (max 126). After compressing the utility creates the appropriate header file structure to paste into `roms_lite.h`. For Z80 or SNA snapshots see the section below.
 
 Once you've added the ROM to `roms_lite.h` you then need to add details about the ROM to the `picoif2lite_lite.h` header file. This is in four parts.
 1. name of the array
-2. whether you need to enable ZXC2 compatibility
-3. the description to show in the ROM selector (max 32chars)
-4. Set the `MAXROMS` number to match the number of ROMs
+2. whether you need to enable ZXC2 or Z80/SNA compatibility
+  - ZXC2 compatibility is denoted by 1, 48k snapshot by 3 and 128k snapshot by 8
+4. the description to show in the ROM selector (max 32chars)
+5. Set the `MAXROMS` number to match the number of ROMs
 
 Use the examples in the header file already as a guide.
 
