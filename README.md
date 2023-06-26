@@ -76,9 +76,9 @@ To add your own ROMs you need to first create a binary dump of the ROM (or just 
 Once you've added the ROM to `roms_lite.h` you then need to add details about the ROM to the `picoif2lite_lite.h` header file. This is in four parts.
 1. name of the array
 2. whether you need to enable ZXC2 or Z80/SNA compatibility
-  - ZXC2 compatibility is denoted by 1, 48k snapshot by 3 and 128k snapshot by 8
-4. the description to show in the ROM selector (max 32chars)
-5. Set the `MAXROMS` number to match the number of ROMs
+     - ZXC2 compatibility is denoted by 1, 48k snapshot by 3 and 128k snapshot by 8
+3. the description to show in the ROM selector (max 32chars)
+4. Set the `MAXROMS` number to match the number of ROMs
 
 Use the examples in the header file already as a guide.
 
