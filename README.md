@@ -26,7 +26,7 @@ The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND p
 - v0.1 initial release taken form PicoIF2ROM but with interrupt driven user button
 
 ## Usage
-Usage is very simple. On every cold boot the Interface will be off meaning the Spectrum will boot as if nothing attached. To activate the interface press and hold the user button for >1second, the Spectrum will now boot into the ROM Explorer. If you just want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. Use the cursor/arrow keys (5-left, 6-down, 7-up, 8-right and no need to press shift) to navigate the ROMs and enter to select one. ROMs with icons to the right hand side indicate they will launch with [ZXC2](#zxc2-cartridge-compatibility) or [Z80/SNA compatibility](#z80--sna-snapshot-compatibility).
+Usage is very simple. On every cold boot the Interface will be off meaning the Spectrum will boot as if nothing attached. To activate the interface press and hold the user button for >1second, the Spectrum will now boot into the ROM Explorer. If you just want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. Use the cursor/arrow keys (5-left, 6-down, 7-up, 8-right and no need to press shift) to navigate the ROMs and enter to select one. ROMs with icons to the right hand side indicate they will launch with [ZXC2 cartridge (ZXC)](#zxc2-cartridge-compatibility) or [Z80/SNA (Z80) compatibility](#z80--sna-snapshot-compatibility).
 
 More details of the [ROM Explorer](#the-rom-selector) can be found below.
 
