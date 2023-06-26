@@ -71,7 +71,7 @@ For demonstration purposes I have included the following ROMs, if you are the ow
 - [Spectrum ROM Tester by Paul Farrow](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm)
 
 ### Adding your own ROMs
-To add your own ROMs you need to first create a binary dump of the ROM (or just download it) and convert that into a `uint8_t` array to put in the `roms_lite.h` header file. I've written a little utility to do this called `compressROM`. This utility uses a very simple compression algorithm to reduce the size of the ROMs which helps if you want to add a loads of them (max 126). After compressing the utility creates the appropriate header file structure to paste into `roms_lite.h`. For Z80 or SNA snapshots see the section below.
+To add your own ROMs you need to first create a binary dump of the ROM (or just download it) and convert that into a `uint8_t` array to put in the `roms_lite.h` header file. I've written a little utility to do this called `compressROM`. This utility uses a very simple compression algorithm to reduce the size of the ROMs which helps if you want to add a loads of them (max 126 or ~1.5MB). After compressing the utility creates the appropriate header file structure to paste into `roms_lite.h`. For Z80 or SNA snapshots see the section below.
 
 Once you've added the ROM to `roms_lite.h` you then need to add details about the ROM to the `picoif2lite_lite.h` header file. This is in four parts.
 1. name of the array
