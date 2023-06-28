@@ -1,7 +1,7 @@
 // MAXROMs
 #define MAXROMS 11
 // the ROMs 
-    const uint8_t *roms[] = {romexplorer            // 0 - 4609bytes ** do not change unless you replace the ROM Exlorer utility **
+    const uint8_t *roms[] = {romexplorer            // 0 - 4743bytes ** do not change unless you replace the ROM Exlorer utility **
                             ,rom_tester_rom         // 1 - 1906bytes
                             ,lookglass              // 2 - 14094bytes
                             ,diagv59                // 3 - 12180bytes
