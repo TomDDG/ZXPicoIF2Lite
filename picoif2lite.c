@@ -2,9 +2,10 @@
 // v0.1 initial release taken form PicoIF2ROM but with interrupt drive user button
 // v0.2 changes to improve ZXC compatibility, added zxcOn true/false
 // v0.3 Z80/SNA snapshot support, zxcOn->compatMode
+// v0.4 fixed issue with not loading correctly on earlier Spectrums, needed i register setting at 0x80
 //
 #define PROG_NAME   "ZX PicoIF2Lite"
-#define VERSION_NUM "v0.3"
+#define VERSION_NUM "v0.4"
 // ---------------------------------------------------------------------------
 // includes
 // ---------------------------------------------------------------------------
@@ -16,6 +17,8 @@
 #include "picoif2lite.pio.h"
 //#include "roms.h"   // the ROMs
 //#include "picoif2lite.h"   // header
+//#include "roms_jh.h"   // the ROMs
+//#include "picoif2lite_jh.h"   // header
 #include "roms_lite.h"   // the ROMs (lite version)
 #include "picoif2lite_lite.h"   // header (lite version)
 // ---------------------------------------------------------------------------
@@ -202,9 +205,9 @@ void resetButton(uint gpio,uint32_t events) {
     } while((gpio_get(PIN_USER)==false)&&(time_us_64()<lastPing+1000000));
     // button pressed for >=1second?
     if(time_us_64()>=lastPing+1000000) {                                            
-        romSelector[0x0005]=rompos;   // 0x0005 current rom ** this is specific to the ROM Explorer ROM **
-        romSelector[0x000a]=rompos-((rompos/21)*21);  // 0x000a current pos ** this is specific to the ROM Explorer ROM **
-        romSelector[0x000f]=(rompos/21)+1;    // 0x000f current page ** this is specific to the ROM Explorer ROM ** 
+        romSelector[0x0009]=rompos;   // 0x0005 current rom ** this is specific to the ROM Explorer ROM **
+        romSelector[0x000e]=rompos-((rompos/21)*21);  // 0x000a current pos ** this is specific to the ROM Explorer ROM **
+        romSelector[0x0013]=(rompos/21)+1;    // 0x000f current page ** this is specific to the ROM Explorer ROM ** 
         // run the Selector ROM          
         gpio_put(PIN_ROMCS,true);     // turn on ROMCS  
         busy_wait_us_32(50000);       // wait 50ms before lifting RESET            
@@ -237,6 +240,11 @@ void resetButton(uint gpio,uint32_t events) {
     }    
     adder=0;
     gpio_put(PIN_RESET,true);   // lift reset    
+    // // wait for 0x0000 memory access before returning
+    // do {
+    //     address=pio_sm_get_blocking(pio,addr_data_sm);
+    //     pio_sm_put_blocking(pio,addr_data_sm,bank1[address]); 
+    // } while(address!=0x0000);
 }
 //
 // ---------------------------------------------------------------------------
