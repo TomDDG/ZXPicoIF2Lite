@@ -132,6 +132,8 @@ I've provided a fully working ROM Explorer program, in the style of File Explore
 
 ![image](./images/romswitchblank_v1_1a.png "ROM Explorer")
 
+The icons to the right handside of the text indicate which mode is used to load the ROM. `Z80` is for Z80 or SNA converted snapshots, `ZXC` is for ZXC2 compatibility and no icon means just a normal ROM.
+
 ![image](./images/romswitch.png "ROM Switch")
 
 You can also use the selector to turn the device off, which pages in the Spectrum ROM, especially useful on 128k machines or if you want to use external devices with shadow ROMs i.e. Interface 1.
