@@ -132,6 +132,8 @@ I've provided a fully working ROM Explorer program, in the style of File Explore
 
 ![image](./images/romswitchblank_v1_1a.png "ROM Explorer")
 
+![image](./images/romswitch.png "ROM Switch")
+
 You can also use the selector to turn the device off, which pages in the Spectrum ROM, especially useful on 128k machines or if you want to use external devices with shadow ROMs i.e. Interface 1.
 
 ![image](./images/off.png "Off")
