@@ -27,9 +27,6 @@ The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND p
 - v0.2 added ZXC2 cartridge compatibility
 - v0.1 initial release taken form PicoIF2ROM but with interrupt driven user button
 
-## Known Issues
-- Sometimes the reset button will crash the Pico. I beleive this is due to the button "bounce" and am investigating potential solutions. The circuit for the button is very simple so this may require a hardware mod. For now I'm trying to find a software solution.
-
 ## Usage
 Usage is very simple. On every cold boot the Interface will be off meaning the Spectrum will boot as if nothing attached. To activate the interface press and hold the user button for >1second, the Spectrum will now boot into the ROM Explorer. If you just want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. Use the cursor/arrow keys (5-left, 6-down, 7-up, 8-right and no need to press shift) to navigate the ROMs and enter to select one. ROMs with icons to the right hand side indicate they will launch with [ZXC2 cartridge (ZXC)](#zxc2-cartridge-compatibility) or [Z80/SNA (Z80) compatibility](#z80--sna-snapshot-compatibility).
 
