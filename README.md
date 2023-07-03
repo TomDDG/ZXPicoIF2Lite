@@ -32,6 +32,8 @@ The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND p
 ## Usage
 Usage is very simple. On every cold boot the Interface will be off meaning the Spectrum will boot as if nothing attached. To activate the interface press and hold the user button for >1second, the Spectrum will now boot into the ROM Explorer. If you just want to reset the Spectrum just press the user button and do not hold down. The ROM Explorer is very easy to use and is in the style of a standard File Explorer. Use the cursor/arrow keys (5-left, 6-down, 7-up, 8-right and no need to press shift) to navigate the ROMs and enter to select one. ROMs with icons to the right hand side indicate they will launch with [ZXC2 cartridge (ZXC)](#zxc2-cartridge-compatibility) or [Z80/SNA (Z80) compatibility](#z80--sna-snapshot-compatibility).
 
+To indicate that ZX PicoIF2Lite is controlling the ROMCS line the LED on the Pico will be on. If it relinquishes control of ROMCS the LED will go out. You can see this with some ZXC compatible ROMS, converted snapshots and if you turn the unit off.
+
 More details of the [ROM Explorer](#the-rom-selector) can be found below.
 
 ## Building an Interface
@@ -106,7 +108,7 @@ The conversion of the snapshot to ROM is relatively simple and takes advantage o
   - The final part of the loader (7bytes long) is placed either in the screen or just under the stack, if possible, to avoid screen corruption.
 - The final part tells the interface to turn off, enables interrupts (if needed) and jumps to the correct program counter. The snapshot is now fully loaded.
 
-Even with 128k Snapshots the loading is near instant. While the Pico is copying the ROM to memory the LED will be on.
+Even with 128k Snapshots the loading is near instant. While the Pico is copying the ROM to memory the LED will flash.
 
 ## ZXC2 Cartridge Compatibility
 While researching how to get the 128k ROM editor working on the device, before the ROMCS change, I remembered [Paul Farrow's FruitCake website](http://www.fruitcake.plus.com/Sinclair/Interface2/Interface2_ResourceCentre.htm) and the numerous cartridges and ROMs he had created. Some of those ROMs require software based bank switching and also for the unit to be disabled. Now that I could control the ROMCS line it was relatively easy to adapt the Pico code so that it could be compatible with Paul's ZX2 cartridge. As ZX2 compatibility isn't always desirable, due to it constantly scanning the top 64kB of ROM until you tell it not to, I added a toggle so that you can chose whether you want ZX2 compatibility or just run the unit as originally intended.
@@ -121,8 +123,6 @@ The following is a quick summary of how I've implemented it using the Pico. When
   - To use this you need to create a single ROM binary with all the ROMs you want to swap in/out using the ZXC2 commands. 
   - The Spectrum 128k emulator ROM on Paul's website is a 32kB or 48kB ROM as an example. You don't need to split this into 2 or 3 16kB ROMs, just load the whole thing.
 
-To indicate ZX2 compatibiltiy is active the Pico LED will be on. If paging is locked using software the LED will go out indicating the interface can no longer use software bank switching. If selecting a normal ROM the LED will be off.
- 
 ZX2 compatibility was tested with [Spectrum ROM Tester](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_ROM_Tester.htm), [Spectrum 128k Emulator (with & without IF1)](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spectrum_128.htm) and [Spanish 128k Emulator](http://www.fruitcake.plus.com/Sinclair/Interface2/Cartridges/Interface2_RC_New_Spanish_128.htm)
 
 ## The ROM Selector
