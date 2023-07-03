@@ -15,9 +15,9 @@
 // along with Z80toROM. If not, see <http://www.gnu.org/licenses/>. 
 //
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #define VERSION_NUM "v1.1"
 #define PROGNAME "Z80toROM"
 
@@ -43,6 +43,9 @@ uint16_t dcz80(FILE** fp_in, uint8_t* out, uint16_t size);
 uint32_t simplelz(uint8_t* fload, uint8_t* store, uint32_t filesize);
 void error(uint8_t errorcode);
 void printOut(FILE* fp, uint8_t* buffer, uint32_t filesize, char* name);
+int replaceChar(char *str, char orig, char rep);
+void toUpperStr(char *dst, const char *src);
+void toLowerStr(char *dst, const char *src);
 
 //main
 int main(int argc, char* argv[]) {
@@ -538,7 +541,7 @@ int main(int argc, char* argv[]) {
 	uint8_t* comp;
 	if ((comp = (uint8_t*)malloc(size * sizeof(uint8_t))) == NULL) error(6);
 	cmsize.rrrr = simplelz(store, comp, size);
-	fprintf(stdout, "Compressed to %dbytes\n", cmsize.rrrr);
+	fprintf(stdout, "Compressed to %d bytes\n", cmsize.rrrr);
 	free(store);
 	// create ROM name
 	char headerName[256];
@@ -560,45 +563,82 @@ int main(int argc, char* argv[]) {
 	} while (i < 252 && fZ80[i] != '.');
 	headerName[j] = '\0';
 	outName[k] = '\0';
-	// output header file
+
+    char description[33] = "";
+    strncpy(description, outName, 33);
+    replaceChar(description, '-', ' ');
+    replaceChar(description, '_', ' ');
+
+    char filename[256] = "";
+    toLowerStr(filename, outName);
+    strcat(filename,".c");
+    replaceChar(filename, '-', '_');
+    replaceChar(filename, ' ', '_');
+    replaceChar(filename, '/', '_');
+    replaceChar(filename, '\'', '_');
+
+    fprintf(stdout, "Writing compressed C snapshot source file '%s'\n", filename);
+
+    // output header file
 	fROM[strlen(fROM)-1] = 'h';
-	if ((fp_out = fopen(fROM, "wb")) == NULL) error(3); // cannot open rom for write	
-	fprintf(fp_out, "// put this into the *roms[] array\n");
-	fprintf(fp_out, ",%s\t// %dbytes\n", headerName, cmsize.rrrr);
-	fprintf(fp_out, "\n// put this into the compatMode[] array\n");
-	if(otek) fprintf(fp_out, ",8\t// 128k Snapshot\n");
-	else fprintf(fp_out, ",3\t// 48k Snapshot\n");
-	fprintf(fp_out, "\n// put this into the *romName[] array\n");
-	fprintf(fp_out, "//0        1         2         3\n");
-	fprintf(fp_out, "//12345678901234567890123456789012\n");
-	fprintf(fp_out, ",\"%s\"\n", outName);
-	fprintf(fp_out, "\n// put this into the roms.h file\n");
-	printOut(fp_out, comp, cmsize.rrrr, headerName);
-	//
-	fclose(fp_out);
+    if ((fp_out = fopen(filename, "wb")) == NULL)
+        error(3); // cannot open rom for write
+
+    outName[strlen(outName) - 2] = '\0';
+    replaceChar(outName, '.', '_');
+    filename[strlen(filename) - 2] = '\0';
+    replaceChar(filename, '.', '_');
+
+    char outHeaderGuard[256] = "";
+    toUpperStr(outHeaderGuard, filename);
+
+    fprintf(fp_out, "#ifndef %s_H\n", outHeaderGuard);
+    fprintf(fp_out, "#define %s_H\n\n", outHeaderGuard);
+    fprintf(fp_out, "#include \"../rom_descriptor.h\"\n\n");
+
+    fprintf(fp_out, "#pragma startup register%s\n", headerName);
+    fprintf(fp_out, "void register%s() __attribute__((constructor));\n\n", headerName);
+
+    printOut(fp_out, comp, cmsize.rrrr, headerName);
+
+    fprintf(fp_out, "RomDescriptor %sRomDescriptor = {\n", headerName);
+    fprintf(fp_out, "\t\"%s\",\n", description);
+    fprintf(fp_out, "\t%d,\n", cmsize.rrrr);
+    fprintf(fp_out, "\t%s,\n", (otek) ? "SNAPSHOT_128K" : "SNAPSHOT_48K");
+    fprintf(fp_out, "\t%s,\n", headerName);
+    fprintf(fp_out, "\t-1,\n");
+    fprintf(fp_out, "\tNULL\n");
+    fprintf(fp_out, "};\n\n");
+
+    fprintf(fp_out, "void register%s() {\n", headerName);
+    fprintf(fp_out, "\tregisterRom(&%sRomDescriptor);\n", headerName);
+    fprintf(fp_out, "}\n\n");
+
+    fprintf(fp_out, "#endif // %s_H\n", outHeaderGuard);
+
+    fclose(fp_out);
 	free(comp);
 	// all done
 	return 0;
 }
 
-//
 // ---------------------------------------------------------------------------
 // printOut - print out the binary in a standard header format
 // ---------------------------------------------------------------------------
-void printOut(FILE* fp, uint8_t* buffer, uint32_t filesize, char* name) {
-	uint32_t i, j;
-	fprintf(fp, "    const uint8_t %s[]={ ", name);
-	for (i = 0; i < filesize; i++) {
-		if ((i % 32) == 0 && i != 0) {
-			fprintf(fp, "\n");
-			for (j = 0; j < 23 + strlen(name); j++) fprintf(fp, " ");
-		}
-		fprintf(fp, "0x%02x", buffer[i]);
-		if (i < filesize - 1) {
-			fprintf(fp, ",");
-		}
-	}
-	fprintf(fp, " };\n // %dbytes", filesize);
+void printOut(FILE *fp, uint8_t *buffer, uint32_t filesize, char *name) {
+    fprintf(fp, "const uint8_t %s[] = {\n\t", name);
+    for (uint32_t i = 0; i < filesize; i++) {
+        fprintf(fp, "0x%02x", buffer[i]);
+        if (i < filesize - 1) {
+            fprintf(fp, ",");
+        }
+        if (((i + 1) % 16) == 0 && i != 0) {
+            fprintf(fp, "\n\t");
+        } else {
+            fprintf(fp, " ");
+        }
+    }
+    fprintf(fp, "\n}; // %d bytes\n\n", filesize);
 }
 
 //
@@ -694,4 +734,26 @@ uint32_t simplelz(uint8_t* fload, uint8_t* store, uint32_t filesize) {
 void error(uint8_t errorcode) {
 	fprintf(stdout, "[E%02d]\n", errorcode);
 	exit(errorcode);
+}
+
+int replaceChar(char *str, char orig, char rep) {
+    char *ix = str;
+    int n = 0;
+    while ((ix = strchr(ix, orig)) != NULL) {
+        *ix++ = rep;
+        n++;
+    }
+    return n;
+}
+
+void toUpperStr(char *dst, const char *src) {
+    while (*src != 0) {
+        (*(dst++) = toupper((unsigned char) *(src++)));
+    }
+}
+
+void toLowerStr(char *dst, const char *src) {
+    while (*src != 0) {
+        (*(dst++) = tolower((unsigned char) *(src++)));
+    }
 }

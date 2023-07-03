@@ -19,49 +19,63 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include "rom_descriptor.h"
 
 void error(int errorcode);
 uint16_t simplelz(uint8_t* fload,uint8_t* store,uint16_t filesize);
-void printOut(FILE *fp,uint8_t *buffer,uint16_t filesize,char *name);
+void printOut(FILE *fp, uint8_t *buffer, uint32_t filesize, char *name);
+int replaceChar(char *str, char orig, char rep);
+void toUpperStr(char *dst, const char *src);
+void toLowerStr(char *dst, const char *src);
 
 // convert binary ROM file to compressed const uint8_t array, pads 8kB ROMs with zeros if needed
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
-        fprintf(stdout,"Usage compressrom <options> infile\n");   
-		fprintf(stdout,"  Options:\n");		
+        fprintf(stdout,"Usage compressrom <options> infile\n");
+		fprintf(stdout,"  Options:\n");
 		fprintf(stdout,"    -p pad space to 16kB, for 8kB ROMs only\n");
 		fprintf(stdout,"    -b produce binary file\n");
 		fprintf(stdout,"    -c check compression\n");
 		fprintf(stdout,"    -d do not compress just create header, also ignores size check\n");
+		fprintf(stdout,"    -t <ROM title>\n");
         exit(0);
     }
 	// check for options
 	bool padSpace=false,binaryOn=false,testCompression=false,noCompression=false;
-	uint argNum=1;
-	while(argv[argNum][0]=='-') {
-		if(argv[argNum][1]=='p') {
-			padSpace=true;
-		} else if(argv[argNum][1]=='b') {
-			binaryOn=true;
-		} else if(argv[argNum][1]=='c') {
-			testCompression=true;
-		} else if(argv[argNum][1]=='d') {
-			noCompression=true;
-		} else {
-			error(0);
-		}
-		argNum++;
-	}
+    char *romTitle = NULL;
+    uint32_t argNum = 1;
+    while (argv[argNum][0] == '-') {
+        if (argv[argNum][1] == 'p') {
+            padSpace = true;
+        } else if (argv[argNum][1] == 'b') {
+            binaryOn = true;
+        } else if (argv[argNum][1] == 'c') {
+            testCompression = true;
+        } else if (argv[argNum][1] == 'd') {
+            noCompression = true;
+        } else if (argv[argNum][1] == 't') {
+            argNum++;
+            romTitle = argv[argNum];
+        } else {
+            error(0);
+        }
+        argNum++;
+    }
+
     // open files
     FILE *fp_in,*fp_out;
-	if ((fp_in=fopen(argv[argNum],"rb"))==NULL) error(1);
+    if ((fp_in = fopen(argv[argNum], "rb")) == NULL) {
+        fprintf(stdout, "'%s'\n", argv[argNum]);
+        error(1);
+    }
     fseek(fp_in,0,SEEK_END); // jump to the end of the file to get the length
 	uint16_t filesize=ftell(fp_in); // get the file size
     rewind(fp_in);
     //
 	if(padSpace==true&&filesize!=8192) error(2); // only pad 8kB ROMs
     uint8_t *readin;
-	uint i,j;
+	uint32_t i,j;
 	if(testCompression==false) {
 		if(noCompression==false) {
     		if(filesize%8192!=0) error(2); // doesn't seem to be a ROM so error	
@@ -94,7 +108,7 @@ int main(int argc, char* argv[]) {
 		//
 		char outName[256],headerName[256];
 		i=0;
-		uint j=0;
+		uint32_t j=0;
 		if(argv[argNum][j]>='0'&&argv[argNum][j]<='9') headerName[j++]='_';
 		do {
 			outName[i]=argv[argNum][i];
@@ -110,14 +124,59 @@ int main(int argc, char* argv[]) {
 		outName[i]=headerName[j]='\0';
 		if(binaryOn) {
 			strcat(outName,".bin");
-			if ((fp_out=fopen(outName,"wb"))==NULL) error(1); 
+			if ((fp_out=fopen(outName,"wb"))==NULL) error(5);
 			fwrite(comp,sizeof(uint8_t),compsize,fp_out);
 			fclose(fp_out);
 		} else {
-			strcat(outName,".h");		
-			if ((fp_out=fopen(outName,"wb"))==NULL) error(1); 
-			printOut(fp_out,comp,compsize,headerName);
-			fclose(fp_out);
+            char description[33] = "";
+            strncpy(description, outName, 33);
+            replaceChar(description, '-', ' ');
+            replaceChar(description, '_', ' ');
+
+            char filename[256] = "";
+            toLowerStr(filename, outName);
+            strcat(filename,".h");
+            replaceChar(filename, '-', '_');
+            replaceChar(filename, ' ', '_');
+            replaceChar(filename, '/', '_');
+            replaceChar(filename, '\'', '_');
+
+            if ((fp_out = fopen(filename, "wb")) == NULL)
+                error(5);
+
+            outName[strlen(outName) - 2] = '\0';
+            replaceChar(outName, '.', '_');
+            filename[strlen(filename) - 2] = '\0';
+            replaceChar(filename, '.', '_');
+
+            char outHeaderGuard[256] = "";
+            toUpperStr(outHeaderGuard, filename);
+
+            fprintf(fp_out, "#ifndef %s_H\n", outHeaderGuard);
+            fprintf(fp_out, "#define %s_H\n\n", outHeaderGuard);
+            fprintf(fp_out, "#include \"../rom_descriptor.h\"\n\n");
+
+            fprintf(fp_out, "#pragma startup register%s\n", headerName);
+            fprintf(fp_out, "void register%s() __attribute__((constructor));\n\n", headerName);
+
+            printOut(fp_out, comp, compsize, headerName);
+
+            fprintf(fp_out, "RomDescriptor %sRomDescriptor = {\n", headerName);
+            fprintf(fp_out, "\t\"%s\",\n", (romTitle != NULL) ? romTitle : description);
+            fprintf(fp_out, "\t%d,\n", compsize);
+            fprintf(fp_out, "\tBUILT_IN_ROM,\n");
+            fprintf(fp_out, "\t%s,\n", headerName);
+            fprintf(fp_out, "\t-1,\n");
+            fprintf(fp_out, "\tNULL\n");
+            fprintf(fp_out, "};\n\n");
+
+            fprintf(fp_out, "void register%s() {\n", headerName);
+            fprintf(fp_out, "\tregisterRom(&%sRomDescriptor);\n", headerName);
+            fprintf(fp_out, "}\n\n");
+
+            fprintf(fp_out, "#endif // %s_H\n", outHeaderGuard);
+
+ 			fclose(fp_out);
 		}
     	free(comp);		
 	} else {
@@ -143,21 +202,29 @@ int main(int argc, char* argv[]) {
 	}
     return 0;
 }
-//
-void printOut(FILE *fp,uint8_t *buffer,uint16_t filesize,char *name) {
-    uint i,j;
-    fprintf(fp,"    const uint8_t %s[]={ ",name);
-    for(i=0;i<filesize;i++) {
-        if((i%16)==0&&i!=0) {
-            fprintf(fp,"\n");
-            for(j=0;j<23+strlen(name);j++) fprintf(fp," ");   
+
+/**
+ * Print out the binary in a standard header format
+ *
+ * @param fp target file
+ * @param buffer source buffer
+ * @param filesize file size
+ * @param name name of the file
+ */
+void printOut(FILE *fp, uint8_t *buffer, uint32_t filesize, char *name) {
+    fprintf(fp, "const uint8_t %s[] = {\n\t", name);
+    for (uint32_t i = 0; i < filesize; i++) {
+        fprintf(fp, "0x%02x", buffer[i]);
+        if (i < filesize - 1) {
+            fprintf(fp, ",");
         }
-        fprintf(fp,"0x%02x",buffer[i]);
-        if(i<filesize-1) {
-            fprintf(fp,",");
+        if (((i + 1) % 16) == 0 && i != 0) {
+            fprintf(fp, "\n\t");
+        } else {
+            fprintf(fp, " ");
         }
     }
-    fprintf(fp," };\n // %dbytes",filesize);
+    fprintf(fp, "\n}; // %d bytes\n\n", filesize);
 }
 
 //
@@ -222,11 +289,34 @@ uint16_t simplelz(uint8_t* fload,uint8_t* store,uint16_t filesize)
 }
 
 // E00 - bad option
-// E01 - cannot open input/output file
+// E01 - cannot open input file
 // E02 - incorrect ROM file
 // E03 - cannot allocate memory
 // E04 - problem reading ROM file
+// E05 - cannot open output file
 void error(int errorcode) {
 	fprintf(stdout, "[E%02d]\n", errorcode);
 	exit(errorcode);
+}
+
+int replaceChar(char *str, char orig, char rep) {
+    char *ix = str;
+    int n = 0;
+    while ((ix = strchr(ix, orig)) != NULL) {
+        *ix++ = rep;
+        n++;
+    }
+    return n;
+}
+
+void toUpperStr(char *dst, const char *src) {
+    while (*src != 0) {
+        (*(dst++) = toupper((unsigned char) *(src++)));
+    }
+}
+
+void toLowerStr(char *dst, const char *src) {
+    while (*src != 0) {
+        (*(dst++) = tolower((unsigned char) *(src++)));
+    }
 }
