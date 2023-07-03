@@ -3,9 +3,10 @@
 // v0.2 changes to improve ZXC compatibility, added zxcOn true/false
 // v0.3 Z80/SNA snapshot support, zxcOn->compatMode
 // v0.4 fixed issue with not loading correctly on earlier Spectrums, needed i register setting at 0x80
+// v0.5 big ZX Spectrum machine code refactoring, LED matches ROMCS on/off, attempt to fix crash on reset
 //
 #define PROG_NAME   "ZX PicoIF2Lite"
-#define VERSION_NUM "v0.4"
+#define VERSION_NUM "v0.5"
 // ---------------------------------------------------------------------------
 // includes
 // ---------------------------------------------------------------------------
@@ -62,8 +63,8 @@ void main() {
     dtoBuffer(romSelector,roms[0]); // ROM Explorer ROM into romSelector
     // 0x0123 maxroms (-1)
     // 0x0160 maxpages
-    romSelector[0x0123]=MAXROMS-1;
-    romSelector[0x0160]=((MAXROMS-1)/21)+1;                
+    romSelector[0x012e]=MAXROMS-1;
+    romSelector[0x016b]=((MAXROMS-1)/21)+1;                
     uint16_t bpos=0;
     uint8_t romnum=0;          
     // build text in bank 1
@@ -151,14 +152,15 @@ void main() {
         if((compatMode[rompos]==3||compatMode[rompos]==8)) {      
             if(address==0x3fff) {
                 if(pagingOn==true) {
+                    gpio_xor_mask(MASK_LED);
                     adder+=16384;
                     if(adder==compatMode[rompos]*16384) {
                         adder=0;
                         pagingOn=false;
                     }
                 } else {
-                    gpio_put(PIN_LED,false);
                     gpio_put(PIN_ROMCS,false);    // ROM off
+                    gpio_put(PIN_LED,false);                    
                 }
             }
         } else if(compatMode[rompos]==1&&pagingOn==true) {
@@ -171,17 +173,18 @@ void main() {
                 if(address>=0x3fc0) {
                     // page in/out
                     if((address&poMask)==poMask) {
-                        gpio_put(PIN_ROMCS,false);    // ROM off
+                        gpio_put(PIN_ROMCS,false);     // turn off ROMCS  
+                        gpio_put(PIN_LED,false);     
                     } else {
-                        gpio_put(PIN_ROMCS,true);    // ROM on
-                    }
+                        gpio_put(PIN_ROMCS,true);     // turn on ROMCS 
+                        gpio_put(PIN_LED,true);       
+                    }  
                     // bank 0-7 (not enough memory for all 16 banks, only 8 allowed)
                     adder=(address&bkMask)*16384;
                     if(adder>131072) adder=0;
                     // lock paging
                     if((address&lkMask)==lkMask) {
                         pagingOn=false;
-                        gpio_put(PIN_LED,false);
                     }
             }
         }
@@ -196,23 +199,29 @@ void main() {
 // ---------------------------------------------------------------------------
 void resetButton(uint gpio,uint32_t events) {
     uint32_t address;         
-    gpio_put(PIN_RESET,false); // put Spectrum in RESET state               
-    gpio_put(PIN_LED,false);        
+    busy_wait_us_32(100000);    // litle wait to help with button bounce
+    gpio_put(PIN_RESET,false); // put Spectrum in RESET state                      
     // wait for button release and check held for 1second to switch ROM otherwise just reset
     uint64_t lastPing=time_us_64();        
     do {
-        busy_wait_us_32(100000); // wait 100ms between each read, minimum 100ms wait on each press
+        busy_wait_us_32(100000); // wait 100ms between each read, minimum 200ms wait on each press
     } while((gpio_get(PIN_USER)==false)&&(time_us_64()<lastPing+1000000));
     // button pressed for >=1second?
-    if(time_us_64()>=lastPing+1000000) {                                            
+    if(time_us_64()>=lastPing+1000000) {                                              
         romSelector[0x0009]=rompos;   // 0x0005 current rom ** this is specific to the ROM Explorer ROM **
         romSelector[0x000e]=rompos-((rompos/21)*21);  // 0x000a current pos ** this is specific to the ROM Explorer ROM **
         romSelector[0x0013]=(rompos/21)+1;    // 0x000f current page ** this is specific to the ROM Explorer ROM ** 
         // run the Selector ROM          
         gpio_put(PIN_ROMCS,true);     // turn on ROMCS  
-        busy_wait_us_32(50000);       // wait 50ms before lifting RESET            
-        uint16_t countAddress=0;           
-        gpio_put(PIN_RESET,true);   // lift reset               
+        gpio_put(PIN_RESET,true);   // lift reset         
+        // attempt to prevent crash     
+        do {
+            address=pio_sm_get_blocking(pio,addr_data_sm);
+            pio_sm_put_blocking(pio,addr_data_sm,romSelector[address]);             
+        } while(address!=0x0000);
+        //
+        gpio_put(PIN_LED,true);          
+        uint16_t countAddress=0;                    
         do {
             address=pio_sm_get_blocking(pio,addr_data_sm);
             pio_sm_put_blocking(pio,addr_data_sm,romSelector[address]); 
@@ -225,26 +234,22 @@ void resetButton(uint gpio,uint32_t events) {
         if(rompos>=MAXROMS) {
             rompos=MAXROMS-1; // error trap
         }                        
-        dtoBuffer(bank1,roms[rompos]);  // unpack correct ROM                          
-        busy_wait_us_32(200000); // wait 200ms to show rom selector screen                                            
+        dtoBuffer(bank1,roms[rompos]);  // unpack correct ROM                                                                    
     }
     // final set-up before restart
     if(compatMode[rompos]==1||compatMode[rompos]==3||compatMode[rompos]==8) {
         pagingOn=true; // if the ROM had this off make sure it is back on
-        gpio_put(PIN_LED,true); 
     }
     if(rompos==0) {
-        gpio_put(PIN_ROMCS,false);     // turn off ROMCS      
+        gpio_put(PIN_ROMCS,false);     // turn off ROMCS  
+        gpio_put(PIN_LED,false);     
     } else {
-        gpio_put(PIN_ROMCS,true);     // turn on ROMCS  
+        gpio_put(PIN_ROMCS,true);     // turn on ROMCS 
+        gpio_put(PIN_LED,true);       
     }    
     adder=0;
+    busy_wait_us_32(100000);    // wait 100ms before lifting RESET       
     gpio_put(PIN_RESET,true);   // lift reset    
-    // // wait for 0x0000 memory access before returning
-    // do {
-    //     address=pio_sm_get_blocking(pio,addr_data_sm);
-    //     pio_sm_put_blocking(pio,addr_data_sm,bank1[address]); 
-    // } while(address!=0x0000);
 }
 //
 // ---------------------------------------------------------------------------
