@@ -4,7 +4,7 @@
 // v0.3 Z80/SNA snapshot support, zxcOn->compatMode
 // v0.4 fixed issue with not loading correctly on earlier Spectrums, needed i register setting at 0x80
 // v0.5 big ZX Spectrum machine code refactoring, LED matches ROMCS on/off, attempt to fix crash on reset
-// v0.6 simpified ROM includes, added header to each ROM to replace romName & compatMode 
+// v0.6 simplified ROM includes, added header to each ROM to replace romName & compatMode 
 //
 #define PROG_NAME   "ZX PicoIF2Lite"
 #define VERSION_NUM "v0.6"
