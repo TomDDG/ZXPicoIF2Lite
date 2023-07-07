@@ -18,12 +18,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#define VERSION_NUM "v1.2"
+#define VERSION_NUM "v1.3"
 #define PROGNAME "Z80toROM"
 
 //v1.0 initial release
 //v1.1 attempt to fix issue with earlier Spectrums
 //v1.2 refactoring, bug fix on loader introduced in v1.1, handle pc in stack, stack in screen & ability to force final loader to screen
+//v1.3 changed output header format and routine to create names from filename to match compressrom
 
 // E00 - invalid option
 // E01 - input file not Z80 or SNA snapshot
@@ -43,38 +44,41 @@ typedef union {
 uint16_t dcz80(FILE** fp_in, uint8_t* out, uint16_t size);
 uint32_t simplelz(uint8_t* fload, uint8_t* store, uint32_t filesize);
 void error(uint8_t errorcode);
-void printOut(FILE* fp, uint8_t* buffer, uint32_t filesize, char* name);
+void printOut(FILE* fp, uint8_t* buffer, uint32_t filesize, char* name,uint8_t cm,char *oname);
 
 //main
 int main(int argc, char* argv[]) {
-	if (argc < 2 || argc>4) {
-		fprintf(stdout, "Usage: Z80onROM <-b> infile.z80/sna\n");
+	if (argc < 2) {
+		fprintf(stdout, "Usage: Z80onROM <-b> infile.z80/sna <displayname>\n");
 		fprintf(stdout, "  -b also create binary files\n");
 		fprintf(stdout, "  -s force final loader into screen\n");
+		fprintf(stdout,"  if no displayname given infile filename will be used\n");		
 		exit(0);
 	}
 	//
 	uint8_t forceScreen=0,produceBinary = 0;
 	uint8_t command=1;
-	if (argc >= 3) {
-		do {
-			if (argv[command][1] == 'b') {
-				produceBinary = 1;
-			} else if(argv[command][1] == 's') {
-				forceScreen = 1;
-			} else {
-				error(0);
-			}
-		} while(++command<argc-1);
+	while(argv[command][0]=='-') {
+		if (argv[command][1] == 'b') {
+			produceBinary = 1;
+		} else if(argv[command][1] == 's') {
+			forceScreen = 1;
+		} else {
+			error(0);
+		}
+		command++;
 	}
 	// check infile is a snapshot
-	if (strcmp(&argv[argc - 1][strlen(argv[argc - 1]) - 4], ".z80") != 0 && strcmp(&argv[argc - 1][strlen(argv[argc - 1]) - 4], ".Z80") != 0 &&
-		strcmp(&argv[argc - 1][strlen(argv[argc - 1]) - 4], ".sna") != 0 && strcmp(&argv[argc - 1][strlen(argv[argc - 1]) - 4], ".SNA") != 0) error(1); // argument isn't .z80/sna or .Z80/SNA
-	// create output fiile
-	char* fZ80 = argv[argc - 1];
+	if (strcmp(&argv[command][strlen(argv[command]) - 4], ".z80") != 0 && strcmp(&argv[command][strlen(argv[command]) - 4], ".Z80") != 0 &&
+		strcmp(&argv[command][strlen(argv[command]) - 4], ".sna") != 0 && strcmp(&argv[command][strlen(argv[command]) - 4], ".SNA") != 0) error(1); // argument isn't .z80/sna or .Z80/SNA
+	// create output file
+	char* fZ80 = argv[command];
 	char fROM[256]; // limit to 256chars
-	int i;
-	for (i = 0; i < strlen(fZ80) - 4 && i < 252; i++) fROM[i] = fZ80[i];
+	int i=0;
+	do {
+		fROM[i] = fZ80[i];
+		i++;
+	} while(i<254&&(argv[command][i]!='.'||i<strlen(argv[command])-4));
 	fROM[i] = '\0';
 	// loader machine code
 #define romReg_brd 34	// Border Colour
@@ -588,39 +592,42 @@ int main(int argc, char* argv[]) {
 	fprintf(stdout,"  \\----------------------------------------------------------------------------/\n");
 	free(store);
 	// create ROM name
-	char headerName[256];
-	char outName[33];
-	i = 0;
-	int j = 0, k = 0;
-	if(fZ80[j]>='0'&&fZ80[j]<='9') headerName[j++]='_';
+	char outName[33],headerName[33];
+
+	//char headerName[256];
+	//char outName[33];
+	i=0;
+	uint j=0;
+	if((fZ80[j]>='0'&&fZ80[j]<='9')) {
+		headerName[j]='_';	// starts with a number
+		j++;
+	}
 	do {
-		if (k < 32) outName[k++] = fZ80[i];
-		if (fZ80[i] >= 'A' && fZ80[i] <= 'Z') {
-			headerName[j++] = fZ80[i] + 32;
-		}
-		else if ((fZ80[i] >= '0' && fZ80[i] <= '9') ||
-			(fZ80[i] >= 'a' && fZ80[i] <= 'z') ||
-			fZ80[i] == '_') {
-			headerName[j++] = fZ80[i];
+		outName[i]=fZ80[i];
+		if(j<32) {
+			if(fZ80[i]>='A'&&fZ80[i]<='Z') {
+				headerName[j++]=fZ80[i]+32;
+			} else if((fZ80[i]>='0'&&fZ80[i]<='9')||
+					(fZ80[i]>='a'&&fZ80[i]<='z')) {
+				headerName[j++]=fZ80[i];
+			} else {
+				headerName[j++]='_';
+			}
 		}
 		i++;
-	} while (i < 252 && fZ80[i] != '.');
-	headerName[j] = '\0';
-	outName[k] = '\0';
-	// output header file
+	} while(i<32&&(fZ80[i]!='.'||i<strlen(fZ80)-4));
+	outName[i]=headerName[j]='\0';
 	fROM[strlen(fROM)-1] = 'h';
 	if ((fp_out = fopen(fROM, "wb")) == NULL) error(3); // cannot open rom for write	
-	fprintf(fp_out, "// put this into the *roms[] array\n");
-	fprintf(fp_out, ",%s\t// %dbytes\n", headerName, cmsize.rrrr);
-	fprintf(fp_out, "\n// put this into the compatMode[] array\n");
-	if(otek) fprintf(fp_out, ",8\t// 128k Snapshot\n");
-	else fprintf(fp_out, ",3\t// 48k Snapshot\n");
-	fprintf(fp_out, "\n// put this into the *romName[] array\n");
-	fprintf(fp_out, "//0        1         2         3\n");
-	fprintf(fp_out, "//12345678901234567890123456789012\n");
-	fprintf(fp_out, ",\"%s\"\n", outName);
-	fprintf(fp_out, "\n// put this into the roms.h file\n");
-	printOut(fp_out, comp, cmsize.rrrr, headerName);
+	//
+	fprintf(fp_out,"// ,%s",headerName);
+	for(i=strlen(headerName);i<35;i++) fprintf(fp_out," ");
+	fprintf(fp_out,"// xx - %dbytes\n",cmsize.rrrr+34);
+	if(command<argc-1) {
+		printOut(fp_out, comp, cmsize.rrrr, headerName,otek,argv[argc-1]);
+	} else {
+		printOut(fp_out, comp, cmsize.rrrr, headerName,otek,outName);
+	}	
 	//
 	fclose(fp_out);
 	free(comp);
@@ -632,9 +639,21 @@ int main(int argc, char* argv[]) {
 // ---------------------------------------------------------------------------
 // printOut - print out the binary in a standard header format
 // ---------------------------------------------------------------------------
-void printOut(FILE* fp, uint8_t* buffer, uint32_t filesize, char* name) {
+void printOut(FILE* fp, uint8_t* buffer, uint32_t filesize, char* name,uint8_t cm,char *oname) {
 	uint32_t i, j;
 	fprintf(fp, "    const uint8_t %s[]={ ", name);
+	//
+	if(cm) fprintf(fp,"0x08,");	// 128k
+	else fprintf(fp,"0x03,");	// 48k
+	fprintf(fp,"0x00,");	// spare
+	j=0;
+	do {
+		if(j<strlen(oname)) fprintf(fp,"0x%02x,",oname[j]); 
+		else fprintf(fp,"0x00,"); 
+	} while(++j<32);
+	fprintf(fp,"\n");
+	for(j=0;j<23+strlen(name);j++) fprintf(fp," ");   
+	//
 	for (i = 0; i < filesize; i++) {
 		if ((i % 32) == 0 && i != 0) {
 			fprintf(fp, "\n");
@@ -645,7 +664,7 @@ void printOut(FILE* fp, uint8_t* buffer, uint32_t filesize, char* name) {
 			fprintf(fp, ",");
 		}
 	}
-	fprintf(fp, " };\n // %dbytes", filesize);
+	fprintf(fp, " };\n");
 }
 
 //

@@ -20,24 +20,30 @@
 #include <stdlib.h>
 #include <string.h>
 
+//v1.0 initial release
+//v1.1 added header to compressed ROM, limit names to 32chars
+
 void error(int errorcode);
 uint16_t simplelz(uint8_t* fload,uint8_t* store,uint16_t filesize);
-void printOut(FILE *fp,uint8_t *buffer,uint16_t filesize,char *name);
+void printOut(FILE *fp,uint8_t *buffer,uint16_t filesize,char *name,uint8_t cm,char *oname,bool noCompression);
 
 // convert binary ROM file to compressed const uint8_t array, pads 8kB ROMs with zeros if needed
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
-        fprintf(stdout,"Usage compressrom <options> infile\n");   
+        fprintf(stdout,"Usage compressrom <options> infile <displayname>\n"); 
 		fprintf(stdout,"  Options:\n");		
+		fprintf(stdout,"    -z create zxc2 compatible ROM\n");
 		fprintf(stdout,"    -p pad space to 16kB, for 8kB ROMs only\n");
-		fprintf(stdout,"    -b produce binary file\n");
-		fprintf(stdout,"    -c check compression\n");
+		fprintf(stdout,"    -b produce binary file instead of header\n");
+		fprintf(stdout,"    -c check compression of binary file\n");
 		fprintf(stdout,"    -d do not compress just create header, also ignores size check\n");
+		fprintf(stdout,"  if no displayname given infile filename will be used\n");
         exit(0);
     }
 	// check for options
 	bool padSpace=false,binaryOn=false,testCompression=false,noCompression=false;
 	uint argNum=1;
+	uint8_t whichROM=0;
 	while(argv[argNum][0]=='-') {
 		if(argv[argNum][1]=='p') {
 			padSpace=true;
@@ -47,6 +53,8 @@ int main(int argc, char* argv[]) {
 			testCompression=true;
 		} else if(argv[argNum][1]=='d') {
 			noCompression=true;
+		} else if(argv[argNum][1]=='z') {
+			whichROM=1;
 		} else {
 			error(0);
 		}
@@ -91,37 +99,61 @@ int main(int argc, char* argv[]) {
 			for(i=0;i<filesize;i++) comp[i]=readin[i];
 		}
 		free(readin);    
+
 		//
-		char outName[256],headerName[256];
+		char outName[33],headerName[33],fName[256];
+		i=0;
+		do {
+			fName[i]=argv[argNum][i];
+			i++;
+		} while(i<251&&(argv[argNum][i]!='.'||i<strlen(argv[argNum])-4));
+		fName[i] = '\0';
 		i=0;
 		uint j=0;
-		if(argv[argNum][j]>='0'&&argv[argNum][j]<='9') headerName[j++]='_';
+		if((argv[argNum][j]>='0'&&argv[argNum][j]<='9')) {
+			headerName[j]='_';	// starts with a number
+			j++;
+		}
 		do {
 			outName[i]=argv[argNum][i];
-			if(argv[argNum][i]>='A'&&argv[argNum][i]<='Z') {
-				headerName[j++]=argv[argNum][i]+32;
-			} else if((argv[argNum][i]>='0'&&argv[argNum][i]<='9')||
-					(argv[argNum][i]>='a'&&argv[argNum][i]<='z')||
-					argv[argNum][i]=='_') {
-				headerName[j++]=argv[argNum][i];
+			if(j<32) {
+				if(argv[argNum][i]>='A'&&argv[argNum][i]<='Z') {
+					headerName[j++]=argv[argNum][i]+32;
+				} else if((argv[argNum][i]>='0'&&argv[argNum][i]<='9')||
+						(argv[argNum][i]>='a'&&argv[argNum][i]<='z')) {
+					headerName[j++]=argv[argNum][i];
+				} else {
+					headerName[j++]='_';
+				}
 			}
 			i++;
-		} while(i<252&&argv[argNum][i]!='.');
+		} while(i<32&&(argv[argNum][i]!='.'||i<strlen(argv[argNum])-4));
 		outName[i]=headerName[j]='\0';
 		if(binaryOn) {
-			strcat(outName,".bin");
-			if ((fp_out=fopen(outName,"wb"))==NULL) error(1); 
+			strcat(fName,".bin");
+			if(strcmp(fName,argv[argNum])==0) strcat(fName,"1"); // just in case the same as the input file
+			if ((fp_out=fopen(fName,"wb"))==NULL) error(1); 
 			fwrite(comp,sizeof(uint8_t),compsize,fp_out);
 			fclose(fp_out);
 		} else {
-			strcat(outName,".h");		
-			if ((fp_out=fopen(outName,"wb"))==NULL) error(1); 
-			printOut(fp_out,comp,compsize,headerName);
+			strcat(fName,".h");		
+			if ((fp_out=fopen(fName,"wb"))==NULL) error(1); 
+			if(noCompression==false) {
+				fprintf(fp_out,"// ,%s",headerName);
+				for(i=strlen(headerName);i<35;i++) fprintf(fp_out," ");
+				fprintf(fp_out,"// xx - %dbytes\n",compsize+34);
+			}
+			if(argNum<argc-1) {
+				printOut(fp_out,comp,compsize,headerName,whichROM,argv[argc-1],noCompression);
+			} else {
+				printOut(fp_out,comp,compsize,headerName,whichROM,outName,noCompression);
+			}
 			fclose(fp_out);
 		}
     	free(comp);		
 	} else {
-    	i=j=0;
+    	i=0;
+		j=34;
     	uint8_t c;
 		do {
 			c=readin[j++];
@@ -144,11 +176,22 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 //
-void printOut(FILE *fp,uint8_t *buffer,uint16_t filesize,char *name) {
+void printOut(FILE *fp,uint8_t *buffer,uint16_t filesize,char *name,uint8_t cm,char *oname,bool noCompression) {
     uint i,j;
     fprintf(fp,"    const uint8_t %s[]={ ",name);
+	if(noCompression==false) {
+		fprintf(fp,"0x%02x,",cm);	// compatibility mode
+		fprintf(fp,"0x00,");	// spare
+		j=0;
+		do {
+			if(j<strlen(oname)) fprintf(fp,"0x%02x,",oname[j]); 
+			else fprintf(fp,"0x00,"); 
+		} while(++j<32);
+		fprintf(fp,"\n");
+		for(j=0;j<23+strlen(name);j++) fprintf(fp," ");   
+	}
     for(i=0;i<filesize;i++) {
-        if((i%16)==0&&i!=0) {
+        if((i%32)==0&&i!=0) {
             fprintf(fp,"\n");
             for(j=0;j<23+strlen(name);j++) fprintf(fp," ");   
         }
@@ -157,7 +200,8 @@ void printOut(FILE *fp,uint8_t *buffer,uint16_t filesize,char *name) {
             fprintf(fp,",");
         }
     }
-    fprintf(fp," };\n // %dbytes",filesize);
+	if(noCompression==false) fprintf(fp," };\n");
+	else fprintf(fp," };\n // %dbytes",filesize);
 }
 
 //

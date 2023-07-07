@@ -4,9 +4,10 @@
 // v0.3 Z80/SNA snapshot support, zxcOn->compatMode
 // v0.4 fixed issue with not loading correctly on earlier Spectrums, needed i register setting at 0x80
 // v0.5 big ZX Spectrum machine code refactoring, LED matches ROMCS on/off, attempt to fix crash on reset
+// v0.6 simpified ROM includes, added header to each ROM to replace romName & compatMode 
 //
 #define PROG_NAME   "ZX PicoIF2Lite"
-#define VERSION_NUM "v0.5"
+#define VERSION_NUM "v0.6"
 // ---------------------------------------------------------------------------
 // includes
 // ---------------------------------------------------------------------------
@@ -16,12 +17,9 @@
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "picoif2lite.pio.h"
-//#include "roms.h"   // the ROMs
 //#include "picoif2lite.h"   // header
-//#include "roms_jh.h"   // the ROMs
 //#include "picoif2lite_jh.h"   // header
-#include "roms_lite.h"   // the ROMs (lite version)
-#include "picoif2lite_lite.h"   // header (lite version)
+#include "picoif2lite_lite.h"   // header (lite version for GitHub)
 // ---------------------------------------------------------------------------
 // gpio pins
 // ---------------------------------------------------------------------------
@@ -43,6 +41,7 @@
 #define lkMask   0b0011111111100000
 #define bkMask   0b0000000000001111
 //
+const uint8_t MAXROMS=*(&roms + 1) - roms; // test
 uint8_t bank1[131072];   // equivalent to a 128K EPROM
 uint8_t romSelector[16384];
 volatile uint8_t rompos=0;     
@@ -57,7 +56,7 @@ void resetButton(uint gpio,uint32_t events);
 //
 void main() {
     // ---------------------------------------------------------------------
-    // build the ROM Selector ROM from picoif2lite.h, only need to do this once
+    // build the ROM Selector ROM from picoif2_lite.h, only need to do this once
     //   ** this is specific to the ROM Explorer ROM **
     // ---------------------------------------------------------------------
     dtoBuffer(romSelector,roms[0]); // ROM Explorer ROM into romSelector
@@ -71,18 +70,20 @@ void main() {
     do {
         if(romnum==MAXROMS-1) bank1[bpos++]=31;
         else bank1[bpos++]=30;
-        for(uint i=0;i<strlen(romName[romnum]);i++) {
-            if(romName[romnum][i]<0x20||romName[romnum][i]>=0x80) {
+        uint i=0;
+        do {
+            if(roms[romnum][2+i]<0x20||roms[romnum][2+i]>=0x80) {
                 bank1[bpos++]=0x20;
             } else {
-                bank1[bpos++]=romName[romnum][i];
-            }
-        } 
-        if(compatMode[romnum]==1) {
+                bank1[bpos++]=roms[romnum][2+i];
+            }                
+            i++;
+        } while(roms[romnum][2+i]!=0&&i<32);
+        if(roms[romnum][0]==1) {
             bank1[bpos++]=9;
             bank1[bpos++]=28;
             bank1[bpos++]=29;
-        } else if(compatMode[romnum]==3||compatMode[romnum]==8) { // 48k or 128k snapshot
+        } else if(roms[romnum][0]==3||roms[romnum][0]==8) { // 48k or 128k snapshot
             bank1[bpos++]=9;
             bank1[bpos++]=26;
             bank1[bpos++]=27;
@@ -149,12 +150,12 @@ void main() {
         address=pio_sm_get_blocking(pio,addr_data_sm);
         pio_sm_put_blocking(pio,addr_data_sm,bank1[address+adder]); // if ROMCS off then direction of Data chip is input so they do not interfere
         // z80 routine
-        if((compatMode[rompos]==3||compatMode[rompos]==8)) {      
+        if((roms[rompos][0]==3||roms[rompos][0]==8)) {      
             if(address==0x3fff) {
                 if(pagingOn==true) {
                     gpio_xor_mask(MASK_LED);
                     adder+=16384;
-                    if(adder==compatMode[rompos]*16384) {
+                    if(adder==roms[rompos][0]*16384) {
                         adder=0;
                         pagingOn=false;
                     }
@@ -163,7 +164,7 @@ void main() {
                     gpio_put(PIN_LED,false);                    
                 }
             }
-        } else if(compatMode[rompos]==1&&pagingOn==true) {
+        } else if(roms[rompos][0]==1&&pagingOn==true) {
                 // top 64 ROM locations (0x3fc0-0x3fff)
                 // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
                 //  0  0  1  1  1  1  1  1  1  1  l  p  b  b  b  b
@@ -214,14 +215,24 @@ void resetButton(uint gpio,uint32_t events) {
         // run the Selector ROM          
         gpio_put(PIN_ROMCS,true);     // turn on ROMCS  
         gpio_put(PIN_RESET,true);   // lift reset         
-        // attempt to prevent crash     
+        // check for ROM crash but looking for 10 im1 interupts (0x0038) in 1/2 second, if these aren't received then reset the ROM and try again
+        uint16_t countAddress=0;
+        lastPing=time_us_64();
         do {
             address=pio_sm_get_blocking(pio,addr_data_sm);
             pio_sm_put_blocking(pio,addr_data_sm,romSelector[address]);             
-        } while(address!=0x0000);
+            if(address=0x0038) countAddress++;            
+            else if(time_us_64()>=lastPing+500000) {
+                gpio_put(PIN_RESET,false);   // lift reset  
+                busy_wait_us_32(100000);
+                gpio_put(PIN_RESET,true);   // lift reset  
+                lastPing=time_us_64();
+                countAddress=0;
+            }
+        } while(countAddress<10);
         //
         gpio_put(PIN_LED,true);          
-        uint16_t countAddress=0;                    
+        countAddress=0;                    
         do {
             address=pio_sm_get_blocking(pio,addr_data_sm);
             pio_sm_put_blocking(pio,addr_data_sm,romSelector[address]); 
@@ -237,7 +248,7 @@ void resetButton(uint gpio,uint32_t events) {
         dtoBuffer(bank1,roms[rompos]);  // unpack correct ROM                                                                    
     }
     // final set-up before restart
-    if(compatMode[rompos]==1||compatMode[rompos]==3||compatMode[rompos]==8) {
+    if(roms[rompos][0]==1||roms[rompos][0]==3||roms[rompos][0]==8) {
         pagingOn=true; // if the ROM had this off make sure it is back on
     }
     if(rompos==0) {
@@ -261,7 +272,7 @@ void resetButton(uint gpio,uint32_t events) {
 // fast
 // ---------------------------------------------------------------------------
 void dtoBuffer(uint8_t *to,const uint8_t *from) { 
-    uint i=0,j=0,k;
+    uint i=0,j=34,k; // start j at 34 to skip header
     uint8_t c,o;
     do {
         c=from[j++];

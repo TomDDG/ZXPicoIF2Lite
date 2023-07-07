@@ -1,49 +1,27 @@
-// MAXROMs
-#define MAXROMS 11
-// the ROMs 
-    const uint8_t *roms[] = {romexplorer            // 0 - 4745bytes ** do not change unless you replace the ROM Exlorer utility **
-                            ,rom_tester_rom         // 1 - 1906bytes
-                            ,lookglass              // 2 - 14094bytes
-                            ,diagv59                // 3 - 12180bytes
-                            ,testrom                // 4 - 5158bytes
-                            ,origtest               // 5 - 3285bytes
-                            ,_128kram               // 6 - 15524bytes
-                            ,_128_rom               // 7 - 30305bytes
-                            ,_128_if1_ed2_rom       // 8 - 37843bytes
-                            ,ss128_rom              // 9 - 30313bytes
-                            ,original               // 10 - 14447bytes
+
+// include the ROM header files here
+#include "rominc/romexplorer.h"   // ** do not remove this one unless you replace the ROM Exlorer utility **
+#include "rominc/ROM_Tester_ROM.h"
+#include "rominc/lg.h"
+#include "rominc/DiagROM.h"
+#include "rominc/Sinclair ZX Spectrum Test ROM (1983)(Logan, Ian)(16K)[aka Sinclair ZX Spectrum Test Cartridge].h"
+#include "rominc/testrom.h"
+#include "rominc/RAM_Tester_ROM.h"
+#include "rominc/128_ROM.h"
+#include "rominc/128_IF1_ED2_ROM.h"
+#include "rominc/SS128_ROM.h"
+#include "rominc/48.h"
+
+// and put them in the order you want them to appear in the selector here
+    const uint8_t *roms[] = {romexplorer                        //  0 - 4672bytes
+                            ,rom_tester_rom                     //  1 - 1940bytes
+                            ,lg                                 //  2 - 15558bytes
+                            ,diagrom                            //  3 - 14128bytes
+                            ,testrom                            //  4 - 12214bytes
+                            ,sinclair_zx_spectrum_test_rom__1   //  5 - 5192bytes
+                            ,ram_tester_rom                     //  6 - 3319bytes
+                            ,_128_rom                           //  7 - 30339bytes
+                            ,_128_if1_ed2_rom                   //  8 - 37877bytes
+                            ,ss128_rom                          //  9 - 30347bytes
+                            ,_48                                // 10 - 14481bytes
                             };      
-// does the ROM work with ZXC compatibility?
-//   this switches on reading of the top 64 bytes of ROM
-//   15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
-//    0  0  1  1  1  1  1  1  1  1  l  p  b  b  b  b
-//     (l)ock - set to 1 to prevent further paging (0x3fe0)
-//     (p)age out - set to 1 to page out the ROM cartridge, 0 to page back in (0x3fd0)
-//     (b)ank - select between the 16 banks (0x3fc0)                           
-    const uint8_t compatMode[] = {0
-                                 ,1
-                                 ,0
-                                 ,0
-                                 ,1
-                                 ,0
-                                 ,0
-                                 ,1
-                                 ,1
-                                 ,1
-                                 ,0
-                                 };                                
-// description to show on the screen for each ROM    
-//   ** this is specific to the ROM Explorer ROM **             
-// max 32 chars                  12345678901234567890123456789012
-    const uint8_t *romName[] = {"Turn ZX PicoIF2Lite Off"
-                               ,"ROM Tester"
-                               ,"Looking Glass ROM"
-                               ,"Retroleum DiagROM v1.59"
-                               ,"ZX Spectrum Diagnositcs v0.37"
-                               ,"ZX Spectrum Test Cartridge"
-                               ,"128k RAM Tester"
-                               ,"Spectrum 128k Emulator"
-                               ,"Spectrum 128k Emulator with IF1"
-                               ,"Spanish 128k Emulator (Espanol)"
-                               ,"Original 48k ROM"
-                               };    
