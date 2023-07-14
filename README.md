@@ -21,7 +21,8 @@ Includes a simple 9pin joystick connector (DE-9 often referred to as DB-9), wire
 The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND pin of the joystick low when RD, A0, A12 & IORQ are low, high when any of them isn't low. This is basically simulating when the Spectrum is reading 67890 on the keyboard. If the output from the OR chip is low then if you move the joystick or press fire it grounds one of the data lines, either D0, D1, D2, D3 or D4. This creates the correct bit pattern for an `IN 0xFE` read on the Spectrum. Diodes protect the data line so it only zeros the bits when they are needed. Have +5v on the ground pin, other than when input is requested, is probably why autofire circuits don't work.
 
 ## Version Control
-- v0.5 ZX Spectrum machine code refactoring, LED matches ROMCS on/off, attempt to fix crash on reset. New version of Z80toROM with bug fixes. **Latest Version
+- v0.6 Simplified ROM includes adding a header to each ROM to replace romName & compatMode. New versions of compressROM & Z80toROM. **Latest Version
+- v0.5 ZX Spectrum machine code refactoring, LED matches ROMCS on/off, attempt to fix crash on reset. New version of Z80toROM with bug fixes. 
 - v0.4 fixed issue with snapshots not loading on earlier Spectrum models
 - v0.3 added converted Z80 and SNA ROM compatibility  
 - v0.2 added ZXC2 cartridge compatibility
