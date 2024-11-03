@@ -22,7 +22,7 @@ The joystick circuit is pretty basic, it uses the 4075 OR chip to pull the GND p
 
 ## Version Control
 - v0.6 Simplified ROM includes adding a header to each ROM to replace romName & compatMode. New versions of compressROM & Z80toROM. **Latest Version
-  - picoif2lite_diagROMboot.uf2 is a special release for those that cannot boot into the Spectrum due to bad memory or for troubleshooting when building the device. If you hold the top button when switching on the Spectrum it will directly boot into the Retroleum DiagROM bypassing everything else. This runs in ROM only.
+  - picoif2lite_diagROMboot.uf2 is a special release for those that cannot boot into the Spectrum due to bad memory or for troubleshooting when building the device. If you hold the top button when switching on the Spectrum it will directly boot into the Retroleum DiagROM bypassing everything else. This runs in ROM only so is good for troubleshooting.
 - v0.5 ZX Spectrum machine code refactoring, LED matches ROMCS on/off, attempt to fix crash on reset. New version of Z80toROM with bug fixes. 
 - v0.4 fixed issue with snapshots not loading on earlier Spectrum models
 - v0.3 added converted Z80 and SNA ROM compatibility  
