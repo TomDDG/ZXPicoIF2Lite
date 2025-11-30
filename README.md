@@ -1,6 +1,6 @@
 # ZX PicoIF2Lite Carousel Edition
 
-Based on v0.6 of ZX PicoIF2Lite ([see main branch](https://github.com/TomDDG/ZXPicoIF2Lite/tree/main)) this is a minimalistic version of the original allowing the device to be used to load Z80 or SNA snapshots via a simple carousel. The carousel displays 256pixels x 64pixel (32x8 attibutes) banners in the middle of the screen to identify which snapshot is being loaded. No change to the hardware is required.
+Based on v0.6 of ZX PicoIF2Lite ([see main branch](https://github.com/TomDDG/ZXPicoIF2Lite/tree/main)) this is a minimalistic version of the original allowing the device to be used to load Z80 or SNA snapshots via a simple carousel. The carousel displays 256pixels x 64pixel (32x8 attibutes) banners in the middle of the screen to identify which snapshot is being loaded. No change to the hardware is required. Not this only works with Z80 or SNA snapshots and cannot be used to load other ROMs.
 
 Usage is very simple. On every cold boot the Interface will be off meaning the Spectrum will boot as normal. To activate the interface press the user button, the Spectrum will now load the Carousel. The Carousel is very easy to use pressing 5 for left, 8 for right and enter to load. The attached joystick left, right and fire also works.
 
