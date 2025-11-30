@@ -7,6 +7,10 @@ The original design always has to have a ROM paged in as the ROMCS line is perma
 
 The big advantage of disabling the Interface is reverting the Spectrum back to original state which improves compatibility with games etc... As of v0.3 I added [Z80 and SNA snapshot](#z80--sna-snapshot-compatibility) support which takes advantage of this. Once the game is copied to RAM the interface will turn itself off switching in the original ROM so the Spectrum behaves exactly as it would if you loaded the game from tape.
 
+## Carousel Edition
+
+New minimalistic version that replaced the ROM Explorer with a simple carousel. Only works with Z80/SNA snapshots (https://github.com/TomDDG/ZXPicoIF2Lite/tree/Carousel)
+
 ## The Interface 
 
 ![image](./images/back_nocoveron.jpg "ZX PicoIF2Lite")
@@ -89,7 +93,7 @@ You can use the provided `picoif2lite_lite.h` header file as a guide.
 As of v0.3 the interface supports Z80 & SNA snapshots that have been converted into a ROM cartridge. This works with 48k and 128k snapshots. I've included a small utility, [Z80toROM](https://github.com/TomDDG/ZXPicoIF2Lite/blob/main/z80torom.c), which converts snapshots into the correct format and outputs a header file to include in the `rominc` folder as per normal ROMs.
 
 The conversion of the snapshot to ROM is relatively simple and takes advantage of ROM paging and ability to switch off the interface. It works as follows:
-- ROM 0 has the loader and compressed Memory Bank 5 (memory lcoation 0x4000, the one with the screen)
+- ROM 0 has the loader and compressed Memory Bank 5 (memory location 0x4000, the one with the screen)
   - Upon launch the ROM copies a simple copy program to RAM (@0x6000) and jumps to this location after the copy
   - The code accesses memory location 0x3fff which tells the Pico to switch to the next ROM
 - ROM 1 contains Memory Bank 2 (memory location 0x8000)
