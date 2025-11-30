@@ -10,7 +10,7 @@ Using the supplied ````buildheader```` software you simply add the snapshots you
 
 Once selected ````enter```` the Carousel will load the snapshot using a custom ROM loader. I've included an example header file ````picoif2lite.h```` with a selection of my games and a secret demo of an unreleased game (all 48k compatible).
 
-## Build Header Software
+## Building Header Software
 
 The supplied ````buildheader```` software creates the header file using the input Z80 or SNA snapshots. It will create a carousel with either a default or supplied screen (default shown above), and banners created either automatically from the snapshot or using a supplied screen.
 
