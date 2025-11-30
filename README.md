@@ -15,7 +15,15 @@ Once selected ````enter```` the Carousel will load the snapshot using a custom R
 The supplied ````buildheader```` software creates the header file using the input Z80 or SNA snapshots. It will create a carousel with either a default or supplied screen (default shown above), and banners created either automatically from the snapshot or using a supplied screen.
 
 ````
-buildheader <carousel.scr> infile1.z80/sna <infile1.scr> infile2.z80/sna <infile2.scr> ... infile16.z80/sna <infile16.scr>
+Usage: buildheader <-t> <carousel.scr> infile1.z80/sna <banner1.scr> infile2.z80/sna <banner2.scr> ... infile16.z80/sna <banner16.scr>
+  -t create output carousel.rom file for testing in an emulator
+  example 1: buildheader rom1.z80 ban1.scr rom2.z80 rom3.z80
+             creates Carousel with 3 snapshots, rom1 has a custom banner from ban1.scr,
+             rom2 and rom3 use default banner from the snapshot screen
+  example 2: buildheader newc.scr rom1.z80 rom2.z80 ban2.scr
+             creates Carousel with 2 snapshots, rom1 uses the snapshot screen,
+             rom2 has a customer banner ban2.scr, the Carousel screen is also replaced with newc.scr
+  banners taken from top 8 rows of either the snapshot screen or the custom banner
 ````
 The tool allows you to replace the default carousel screen and also the banner from each snapshot. Both 48k & 128k snapshots are supported and ````scr```` files have to be ZX Spectrum layout 6912byte files.
 
