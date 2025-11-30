@@ -17,7 +17,7 @@ The supplied ````buildheader```` software creates the header file using the inpu
 ````
 buildheader <carousel.scr> infile1.z80/sna <infile1.scr> infile2.z80/sna <infile2.scr> ... infile16.z80/sna <infile16.scr>
 ````
-Both 48k & 128k snapshots are supported and ````scr```` files have to be ZX Spectrum layout 6912byte files.
+The tool allows you to replace the default carousel screen and also the banner from each snapshot. Both 48k & 128k snapshots are supported and ````scr```` files have to be ZX Spectrum layout 6912byte files.
 
 ## Building Banners
 
@@ -31,7 +31,7 @@ This simply needs to be a full screen 6912byte ZX Spectrum layout ````.scr```` f
 
 ## Building UF2 Tips
 
-Make sure cmake is set to ````Release````. I've also added ````PICO_USE_FASTEST_SUPPORTED_CLOCK=1```` to the ````CMakeLists.txt```` to run the Pico at the new 200MHz rated speed. This helps the Pico keep up with the ZX Spectrum address & data bus.
+Make sure cmake is set to ````Release```` and I recommend SDK v2.2.0 as it supports ````PICO_USE_FASTEST_SUPPORTED_CLOCK=1```` which I've added to ````CMakeLists.txt```` to run the Pico at the new 200MHz rated speed. This helps the Pico keep up with the ZX Spectrum address & data bus.
 
 ## Version Control
 - v0.7 Release version based on v0.6 of ZX PicoIF2Lite
