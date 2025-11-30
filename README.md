@@ -8,9 +8,16 @@ Using the supplied ````buildheader```` software you simply tell it which snapsho
 
 ![image](./images/carousel1.png "Default Carousel")
 
-Once selected the Carousel will load the snapshot using the ROM loader.
+Once selected the Carousel will load the snapshot using the ROM loader. I've included an example header file ````picoif2lite.h```` with a selection of my games.
 
-![image](./images/carousel2.png "Loading")
+## Build Header Software
+
+The supplied ````buildheader```` software creates the header file using the input Z80 or SNA snapshots. It will create a carousel with either a default or supplied screen (default shown above), and banners created either automatically from the snapshot or using a supplied screen.
+
+````
+buildheader <carousel.scr> infile1.z80/sna <infile1.scr> infile2.z80/sna <infile2.scr> ... infile16.z80/sna <infile16.scr>
+````
+Both 48k & 128k snapshots are supported and ````scr```` files have to be ZX Spectrum layout 6912byte files.
 
 ## Building Banners
 
