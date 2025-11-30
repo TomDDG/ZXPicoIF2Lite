@@ -1,15 +1,8 @@
 // Versions
-// v0.1 initial release taken form PicoIF2ROM but with interrupt drive user button
-// v0.2 changes to improve ZXC compatibility, added zxcOn true/false
-// v0.3 Z80/SNA snapshot support, zxcOn->compatMode
-// v0.4 fixed issue with not loading correctly on earlier Spectrums, needed i register setting at 0x80
-// v0.5 big ZX Spectrum machine code refactoring, LED matches ROMCS on/off, attempt to fix crash on reset
-// v0.6 simplified ROM includes, added header to each ROM to replace romName & compatMode
-// v0.7 boot into 1st ROM if hold down RESET on boot
-// v0.7c special carousel edition based on 0.7
+// v0.7 special carousel edition based on 0.6
 //
 #define PROG_NAME   "ZX PicoIF2Lite"
-#define VERSION_NUM "v0.7c"
+#define VERSION_NUM "v0.7"
 // ---------------------------------------------------------------------------
 // includes
 // ---------------------------------------------------------------------------
