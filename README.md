@@ -31,7 +31,7 @@ This simply needs to be a full screen 6912byte ZX Spectrum layout ````.scr```` f
 
 ## Building UF2 Tips
 
-Make sure ````cmake```` is set to ````Release```` and I recommend SDK v2.2.0 as it supports ````PICO_USE_FASTEST_SUPPORTED_CLOCK=1```` which I've added to ````CMakeLists.txt```` to run the Pico at the new 200MHz rated speed. This helps the Pico keep up with the ZX Spectrum address & data bus.
+Make sure ````cmake```` is set to ````Release```` and I recommend SDK v2.2.0 as it supports ````PICO_USE_FASTEST_SUPPORTED_CLOCK=1```` which I've added to ````CMakeLists.txt```` to run the Pico at the new 200MHz rated speed. This helps the Pico keep up with the ZX Spectrum address & data bus. I've supplied an example UF2 to test.
 
 ## Version Control
 - v0.7 Release version based on v0.6 of ZX PicoIF2Lite
