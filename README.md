@@ -25,6 +25,10 @@ The ````buildheader```` software will create banners for each snapshot from the 
 
 ![image](./images/createbanner.png "Create Banner")
 
+## Building UF2 Tips
+
+Make sure cmake is set to ````Release````. I've also added ````PICO_USE_FASTEST_SUPPORTED_CLOCK=1```` to the ````CMakeLists.txt```` to run the Pico at the new 200MHz rated speed. This helps the Pico keep up with the ZX Spectrum address & data bus.
+
 ## Version Control
 - v0.7 Release version based on v0.6 of ZX PicoIF2Lite
 
