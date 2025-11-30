@@ -25,6 +25,10 @@ The ````buildheader```` software will create banners for each snapshot from the 
 
 ![image](./images/createbanner.png "Create Banner")
 
+## Building Replacement Carousel Screen
+
+This simply needs to be a full screen 6912byte ZX Spectrum layout ````.scr```` file. I use ````SevenUp```` to create mine but there are other packages available. The screen needs to have a 256x64 pixel cutout in the centre for the snapshot bannners, see the example banner above. I've included an example ````examplecarousel.scr```` file to edit.
+
 ## Building UF2 Tips
 
 Make sure cmake is set to ````Release````. I've also added ````PICO_USE_FASTEST_SUPPORTED_CLOCK=1```` to the ````CMakeLists.txt```` to run the Pico at the new 200MHz rated speed. This helps the Pico keep up with the ZX Spectrum address & data bus.
