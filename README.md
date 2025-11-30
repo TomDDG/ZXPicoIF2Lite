@@ -1,5 +1,6 @@
-# ZX PicoIF2Lite
-Sinclair Interface 2 replacement including ROM Cartridge emulation using a Raspberry Pico.
+# ZX PicoIF2Lite Carousel Edition
+
+Based on v0.7 of ZX PicoIF2Lite 
 
 The main purpose of this interface is to replicate the [Sinclair Interface 2](https://en.wikipedia.org/wiki/ZX_Interface_2), adapting the original Pico ROM design by [Derek Fountain](https://github.com/derekfountain/zx-spectrum-pico-rom). Derek's idea was to use the Pico's flash memory in place of the ROM cartridges and I adapted this slightly to use the PiO rather than bit-banging, to use through hole components (as easier to build), to control the ROMCS line using the Pico and to also to include a joystick port. 
 
