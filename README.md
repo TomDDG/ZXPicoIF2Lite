@@ -1,12 +1,7 @@
 # ZX PicoIF2Lite Carousel Edition
 
-Based on v0.7 of ZX PicoIF2Lite 
+Based on v0.6 of ZX PicoIF2Lite (see main branch)
 
-The main purpose of this interface is to replicate the [Sinclair Interface 2](https://en.wikipedia.org/wiki/ZX_Interface_2), adapting the original Pico ROM design by [Derek Fountain](https://github.com/derekfountain/zx-spectrum-pico-rom). Derek's idea was to use the Pico's flash memory in place of the ROM cartridges and I adapted this slightly to use the PiO rather than bit-banging, to use through hole components (as easier to build), to control the ROMCS line using the Pico and to also to include a joystick port. 
-
-The original design always has to have a ROM paged in as the ROMCS line is permanently attached to 5V. This made it difficult to use shadow ROMs like with an Interface 1, and basically meant adding functionality to the Pico to page in shadow ROMs when needed. It also wasn't great on a 128k machine as it stopped the editor being useable. I therefore altered the design to be able to control the ROMCS line using the Pico which meant the interface could be disabled. This did mean losing the M1 line input to the Pico but this mirrors the original Interface 2.
-
-The big advantage of disabling the Interface is reverting the Spectrum back to original state which improves compatibility with games etc... As of v0.3 I added [Z80 and SNA snapshot](#z80--sna-snapshot-compatibility) support which takes advantage of this. Once the game is copied to RAM the interface will turn itself off switching in the original ROM so the Spectrum behaves exactly as it would if you loaded the game from tape.
 
 ## The Interface 
 
